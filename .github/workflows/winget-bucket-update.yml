@@ -3,6 +3,8 @@
 # Note: This requires a personal gh token to be setup as a secret named 'FERDIUM_WINGET_PAT'
 # TODO: refactor the jobs process in order to do the parsing of the json only in one place.
 
+# CHANGE: This does a dry-run of the update but doesn't submit it
+
 name: Update Ferdium package on winget
 
 on:
@@ -15,7 +17,8 @@ on:
     types: [published]
 
 env:
-  REPO_URL: https://api.github.com/repos/ferdium/ferdium-app/releases
+  # CHANGE: Set you own repo url
+  REPO_URL: https://api.github.com/repos/alphrag/ferdium-app/releases
 
 jobs:
   manual_winget_update:
@@ -91,7 +94,8 @@ jobs:
 
           iwr https://aka.ms/wingetcreate/latest -OutFile wingetcreate.exe
 
-          $command = ".\wingetcreate.exe update $package -v '${{ env.last_version }}' -u $installerUrls -t $ghToken -o .\ -s"
+          # CHANGE: Set local output (`-o`) and remove submission (`-s`)
+          $command = ".\wingetcreate.exe update $package -v '${{ env.last_version }}' -u $installerUrls -t $ghToken -o .\"
           Write-Host $command
           Invoke-Expression $command
 
@@ -134,6 +138,7 @@ jobs:
           $package = '${{ env.PACKAGE_NAME }}'
           $ghToken = '${{ secrets.FERDIUM_WINGET_PAT }}'
 
-          $command = ".\wingetcreate.exe update $package -v $($version.Trim('v')) -u $installerUrls -t $ghToken -o .\ -s"
+          # CHANGE: Set local output (`-o`) and remove submission (`-s`)
+          $command = ".\wingetcreate.exe update $package -v $($version.Trim('v')) -u $installerUrls -t $ghToken -o .\"
           Write-Host $command
           Invoke-Expression $command
