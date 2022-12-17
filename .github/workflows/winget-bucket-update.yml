@@ -142,3 +142,17 @@ jobs:
           $command = ".\wingetcreate.exe update $package -v $($version.Trim('v')) -u $installerUrls -t $ghToken -o .\"
           Write-Host $command
           Invoke-Expression $command
+
+# CHANGE: Personal test using jq on unix for dealing with release api instead of windows powershell
+  test_bash:
+    name: "Test parsing using jq on bash instead of pws"
+    if: ${{ github.event_name == 'workflow_dispatch' && contains(github.event.inputs.message, '[jq]') }}
+    runs-on: windows-latest
+    steps:
+      - name: Get info url
+        run: |
+          RELEASE=$(curl https://api.github.com/repos/ferdium/ferdium-app/releases | jq -r '.[1]')
+          echo "$RELEASE" | jq '.assets[] | {name: .name, url: .browser_download_url} | select(.name |endswith("-x64.msi") or endswith("-ia32.msi") or (startswith("Ferdium-win-AutoSetup") and endswith(".exe")))'
+          SETUP= echo "$RELEASE" | jq '.assets[] | select(.name | test("Ferdium-win-AutoSetup*") and endswith(".exe")) | .browser_download_url'
+        # etc
+        shell: bash
