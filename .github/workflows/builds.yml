@@ -136,7 +136,7 @@ jobs:
     name: 'macos ${{ github.event.inputs.message }}'
     needs: check_updates
     if: ${{ (needs.check_updates.outputs.should_run != 'false') && (github.event_name != 'workflow_dispatch' || (github.event_name == 'workflow_dispatch' && (contains(github.event.inputs.message, '[macOS]') || (!contains(github.event.inputs.message, '[macOS]') && !contains(github.event.inputs.message, '[Linux]') && !contains(github.event.inputs.message, '[Windows]'))))) }}
-    runs-on: macos-12
+    runs-on: macos-13
     steps:
       - name: Set env vars
         run: |
