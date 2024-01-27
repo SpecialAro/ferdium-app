@@ -24,6 +24,7 @@ class LoginScreen extends Component<IProps> {
           stores.user.logoutReason === stores.user.logoutReasonTypes.SERVER
         }
         signupRoute={stores.user.signupRoute}
+        importSessionsRoute={stores.user.importSessionsRoute}
         passwordRoute={stores.user.passwordRoute}
         error={error}
       />

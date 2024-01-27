@@ -60,6 +60,10 @@ const messages = defineMessages({
     id: 'login.link.signup',
     defaultMessage: 'Create a free account',
   },
+  importSessions: {
+    id: 'login.link.importSessions',
+    defaultMessage: 'Import sessions data',
+  },
   passwordLink: {
     id: 'login.link.password',
     defaultMessage: 'Reset password',
@@ -72,6 +76,7 @@ interface IProps extends WrappedComponentProps {
   isTokenExpired: boolean;
   isServerLogout: boolean;
   signupRoute: string;
+  importSessionsRoute: string;
   passwordRoute: string; // TODO: Uncomment this line after fixing password recovery in-app
   error: GlobalError;
 }
@@ -117,6 +122,7 @@ class Login extends Component<IProps> {
       isTokenExpired,
       isServerLogout,
       signupRoute,
+      importSessionsRoute,
       error,
       intl,
       // passwordRoute, // TODO: Uncomment this line after fixing password recovery in-app
@@ -198,6 +204,9 @@ class Login extends Component<IProps> {
             target="_blank" // TODO: Remove this line after fixing password recovery in-app
           >
             {intl.formatMessage(messages.passwordLink)}
+          </Link>
+          <Link to={importSessionsRoute}>
+            {intl.formatMessage(messages.importSessions)}
           </Link>
         </div>
         <div className="auth__help">

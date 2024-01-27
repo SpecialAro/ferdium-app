@@ -37,6 +37,7 @@ import { WORKSPACES_ROUTES } from './features/workspaces/constants';
 import EditWorkspaceScreen from './features/workspaces/containers/EditWorkspaceScreen';
 import WorkspacesScreen from './features/workspaces/containers/WorkspacesScreen';
 import type { RealStores } from './stores';
+import ImportSessionsScreen from './containers/settings/ImportSessionsScreen';
 
 interface IProps {
   history: HashHistory;
@@ -104,6 +105,10 @@ class FerdiumRoutes extends Component<IProps> {
               element={
                 <AuthReleaseNotesScreen {...routeProps} {...errorProps} />
               }
+            />
+            <Route
+              path="/auth/import-sessions"
+              element={<ImportSessionsScreen {...this.props} />}
             />
           </Route>
 

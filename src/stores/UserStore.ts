@@ -27,6 +27,8 @@ export default class UserStore extends TypedStore {
 
   SIGNUP_ROUTE: string = `${this.BASE_ROUTE}/signup`;
 
+  IMPORT_SESSIONS_ROUTE: string = `${this.BASE_ROUTE}/import-sessions`;
+
   SETUP_ROUTE: string = `${this.BASE_ROUTE}/signup/setup`;
 
   IMPORT_ROUTE: string = `${this.BASE_ROUTE}/signup/import`;
@@ -127,6 +129,10 @@ export default class UserStore extends TypedStore {
 
   get signupRoute(): string {
     return this.SIGNUP_ROUTE;
+  }
+
+  get importSessionsRoute(): string {
+    return this.IMPORT_SESSIONS_ROUTE;
   }
 
   get passwordRoute(): string {

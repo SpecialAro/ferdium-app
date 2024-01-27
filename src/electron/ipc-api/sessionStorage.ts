@@ -1,6 +1,6 @@
-import { type Session, ipcMain, session } from 'electron';
-
+import { ipcMain, Session, session, shell } from 'electron';
 import { TODOS_PARTITION_ID } from '../../config';
+import { userDataPath } from '../../environment-remote';
 
 const debug = require('../../preload-safe-debug')(
   'Ferdium:ipcApi:sessionStorage',
@@ -18,21 +18,28 @@ function deduceSession(serviceId: string | undefined | null): Session {
 }
 
 export default async () => {
-  ipcMain.on('clear-storage-data', (_event, { serviceId, targetsToClear }) => {
-    try {
-      const serviceSession = deduceSession(serviceId);
-      serviceSession.flushStorageData();
-      if (targetsToClear) {
-        debug('Clearing targets:', targetsToClear);
-        serviceSession.clearStorageData(targetsToClear);
-      } else {
-        debug('Clearing all targets');
-        serviceSession.clearStorageData();
+  ipcMain.on(
+    'clear-storage-data',
+    async (_event, { serviceId, targetsToClear }) => {
+      try {
+        const serviceSession = deduceSession(serviceId);
+        serviceSession.flushStorageData();
+        debug(`${userDataPath()}\\Partitions\\service-${serviceId}`);
+        await shell.trashItem(
+          `${userDataPath()}\\Partitions\\service-${serviceId}`,
+        );
+        if (targetsToClear) {
+          debug('Clearing targets:', targetsToClear);
+          serviceSession.clearStorageData(targetsToClear);
+        } else {
+          debug('Clearing all targets');
+          serviceSession.clearStorageData();
+        }
+      } catch (error) {
+        debug(error);
       }
-    } catch (error) {
-      debug(error);
-    }
-  });
+    },
+  );
 
   ipcMain.handle('clear-cache', (_event, { serviceId }) => {
     const serviceSession = deduceSession(serviceId);

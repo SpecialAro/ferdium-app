@@ -29,7 +29,6 @@ export default function init(stores: {
 
     for (const service of services) {
       const s = session.fromPartition(`persist:service-${service.id}`);
-
       if (config.isEnabled) {
         const serviceProxyConfig = proxySettings[service.id];
 

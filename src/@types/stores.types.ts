@@ -301,6 +301,7 @@ interface UserStore extends TypedStore {
   PASSWORD_ROUTE: '/auth/password';
   SETUP_ROUTE: '/auth/signup/setup';
   SIGNUP_ROUTE: '/auth/signup';
+  IMPORT_SESSIONS_ROUTE: '/auth/import-sessions';
   WELCOME_ROUTE: '/auth/welcome';
   accountType: () => void;
   authToken: () => void;
@@ -332,6 +333,7 @@ interface UserStore extends TypedStore {
   loginRoute: string;
   passwordRoute: string;
   signupRoute: string;
+  importSessionsRoute: string;
   team: () => void;
 }
 
