@@ -1,3 +1,8 @@
+import io from 'socket.io-client';
+import AdmZip from 'adm-zip';
+import path from 'node:path';
+import { copy, rm } from 'fs-extra';
+import { Component } from 'react';
 import { observer } from 'mobx-react';
 import { Component } from 'react';
 import {
@@ -16,6 +21,27 @@ import {
 import type User from '../../../models/User';
 import Button from '../../ui/button';
 import Infobox from '../../ui/infobox/index';
+import { LOCAL_SERVER, LIVE_FRANZ_API } from '../../../config';
+import User from '../../../models/User';
+import { userDataPath } from '../../../environment-remote';
+
+const debug = require('../../../preload-safe-debug')(
+  'Ferdium:App:AccountDashboard',
+);
+
+const partitionsPath = userDataPath('Partitions');
+
+const tempPath = userDataPath('tmp');
+const tempPartitions = path.join(tempPath, 'Partitions');
+
+const createZipFromFolder = (folder: string) => {
+  const zip = new AdmZip();
+
+  zip.addLocalFolder(folder);
+  const willSendThis = zip.toBuffer();
+
+  return willSendThis;
+};
 import Loader from '../../ui/loader';
 
 const messages = defineMessages({
@@ -85,8 +111,113 @@ interface IProp extends WrappedComponentProps {
   openInvoices: () => void;
 }
 
+interface IState {
+  socketCode: string | null;
+  isSocketConnected: boolean;
+  dataToSend?: {
+    buffer: Buffer;
+    filename: string;
+    type: string;
+  };
+  isLoadingData: boolean;
+  sessionInput: string;
+}
+
 @observer
-class AccountDashboard extends Component<IProp> {
+class AccountDashboard extends Component<IProp, IState> {
+  socket = io('http://localhost:3000');
+
+  handleSessionInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    this.setState({ sessionInput: event.target.value });
+  };
+
+  constructor(props: IProp) {
+    super(props);
+    this.state = {
+      socketCode: null,
+      isSocketConnected: false,
+      dataToSend: undefined,
+      isLoadingData: false,
+      sessionInput: '',
+    };
+  }
+
+  sendSessionData = async () => {
+    try {
+      // Set loading state to true
+      this.setState({ isLoadingData: true });
+
+      // Clean partitions folder
+      await rm(tempPath, { recursive: true, force: true });
+      await copy(partitionsPath, tempPartitions);
+
+      // Compress path into zip
+      const buffer = createZipFromFolder(tempPartitions);
+      this.setState({
+        dataToSend: {
+          buffer,
+          filename: 'partitions.zip',
+          type: 'zip',
+        },
+      });
+
+      // Emit the code generation event
+      this.socket.emit('generate-code', () => {
+        debug('Code generated');
+      });
+
+      // Set loading state to false after the code is generated
+      this.setState({ isLoadingData: false });
+    } catch (error) {
+      console.error('Error sending session data:', error);
+      // Handle error as needed
+      // Set loading state to false in case of an error
+      this.setState({ isLoadingData: false });
+    }
+  };
+
+  componentDidMount(): void {
+    const { socket } = this;
+
+    socket.connect();
+
+    socket.on('connect', () => {
+      debug('Connected to socket');
+      this.setState({ isSocketConnected: true });
+    });
+
+    socket.on('disconnect', () => {
+      debug('Disconnected from socket');
+      this.setState({ isSocketConnected: false });
+    });
+
+    socket.on('code', data => {
+      debug(data);
+      this.setState({ socketCode: data });
+    });
+
+    socket.on('file-received', async () => {
+      try {
+        debug('File received by other client');
+        await rm(tempPartitions, { recursive: true, force: true });
+        this.setState({ socketCode: null });
+      } catch (error) {
+        console.error('Error removing files:', error);
+        // Handle error as needed
+      }
+    });
+
+    socket.on('ready-to-send', () => {
+      const { socketCode, dataToSend } = this.state;
+
+      socket.emit('send-file', socketCode, dataToSend);
+    });
+  }
+
+  componentWillUnmount(): void {
+    this.socket.disconnect();
+  }
+
   render() {
     const {
       user,
@@ -104,6 +235,8 @@ class AccountDashboard extends Component<IProp> {
 
     const isUsingWithoutAccount = server === LOCAL_SERVER;
     const isUsingFranzServer = server === LIVE_FRANZ_API;
+
+    const { socketCode, isSocketConnected } = this.state;
 
     return (
       <div className="settings__main">
@@ -221,6 +354,59 @@ class AccountDashboard extends Component<IProp> {
                 </>
               )}
             </>
+          )}
+          {isSocketConnected && (
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                width: '100%',
+                height: 'auto',
+              }}
+            >
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'row',
+                  height: 'fit-content',
+                  padding: '1rem',
+                  alignItems: 'center',
+                }}
+              >
+                <Button
+                  label="Send session data"
+                  className="franz-form__button--inverted"
+                  onClick={this.sendSessionData}
+                  disabled={this.state.isLoadingData}
+                />
+                <p style={{ userSelect: 'text', paddingLeft: '1rem' }}>
+                  {socketCode}
+                </p>
+              </div>
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'row',
+                  height: 'fit-content',
+                  padding: '1rem',
+                  alignItems: 'center',
+                }}
+              >
+                <Button
+                  label="Receive session data"
+                  className="franz-form__button--inverted"
+                  // onClick={receiveSessionData}
+                />
+                <input
+                  type="text"
+                  placeholder="Enter session code"
+                  style={{ marginLeft: '1rem', width: '10rem' }}
+                  value={this.state.sessionInput}
+                  onChange={this.handleSessionInputChange}
+                />
+              </div>
+            </div>
           )}
         </div>
         <ReactTooltip
