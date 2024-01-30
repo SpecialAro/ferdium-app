@@ -1,6 +1,7 @@
 import io from 'socket.io-client';
 import AdmZip from 'adm-zip';
 import path from 'node:path';
+import * as crypto from 'node:crypto';
 import { copy, rm } from 'fs-extra';
 import { Component } from 'react';
 import { observer } from 'mobx-react';
@@ -207,10 +208,28 @@ class AccountDashboard extends Component<IProp, IState> {
       }
     });
 
-    socket.on('ready-to-send', () => {
+    socket.on('expired', () => {
+      debug('Session expired');
+      this.setState({ socketCode: null });
+    });
+
+    socket.on('ready-to-send', publicKey => {
       const { socketCode, dataToSend } = this.state;
 
-      socket.emit('send-file', socketCode, dataToSend);
+      if (!socketCode || !dataToSend) {
+        debug('Not ready to send');
+        return;
+      }
+
+      // Encrypt dataToSend with publicKey
+      const encryptedData = crypto
+        .publicEncrypt(publicKey, Buffer.from(JSON.stringify(dataToSend)))
+        .toString('base64');
+
+      socket.emit('send-file', socketCode, {
+        ...dataToSend,
+        buffer: encryptedData,
+      });
     });
   }
 

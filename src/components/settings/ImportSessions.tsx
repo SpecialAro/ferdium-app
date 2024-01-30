@@ -1,3 +1,4 @@
+import * as crypto from 'node:crypto';
 import { Component, ReactElement } from 'react';
 import { observer, inject } from 'mobx-react';
 import { defineMessages, injectIntl, WrappedComponentProps } from 'react-intl';
@@ -47,6 +48,10 @@ interface IState {
   isSocketConnected: boolean;
   isLoadingData: boolean;
   isFileReceived: boolean;
+  key: {
+    publicKey: string;
+    privateKey: string;
+  };
 }
 
 @inject('actions')
@@ -65,6 +70,10 @@ class ImportSessions extends Component<IProps, IState> {
       isSocketConnected: false,
       isLoadingData: false,
       isFileReceived: false,
+      key: {
+        publicKey: '',
+        privateKey: '',
+      },
     };
   }
 
@@ -88,8 +97,14 @@ class ImportSessions extends Component<IProps, IState> {
 
       debug('Receiving file');
 
+      const { privateKey } = this.state.key;
+
       // Handle received data here
-      const { buffer } = data;
+      const decryptData = crypto.privateDecrypt(privateKey, data);
+
+      const decryptedData = JSON.parse(decryptData.toString());
+
+      const { buffer } = decryptedData;
       const code = this.state.socketCode;
       await rm(partitionsPath, { recursive: true, force: true });
 
@@ -115,7 +130,24 @@ class ImportSessions extends Component<IProps, IState> {
     const receiveSessionData = () => {
       const { socket } = this;
       debug(this.state.socketCode);
-      socket.emit('join-channel', this.state.socketCode);
+      // Generate Keys
+      const key = crypto.generateKeyPairSync('rsa', {
+        modulusLength: 4096,
+        publicKeyEncoding: {
+          type: 'spki',
+          format: 'pem',
+        },
+        privateKeyEncoding: {
+          type: 'pkcs8',
+          format: 'pem',
+        },
+      });
+      this.setState({ key });
+
+      socket.emit('join-channel', {
+        guess: this.state.socketCode,
+        publicKey: key.publicKey,
+      });
     };
 
     return (
