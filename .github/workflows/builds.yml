@@ -3,6 +3,7 @@
 
 # Note: This workflow requires some secrets setup, and set on this repo with the names:
 # 'FERDIUM_PUBLISH_TOKEN' (A GitHub Personal Access Token with appropriate permissions - for publishing the built artifacts)
+# 'ARTIFACT_TOKEN' (A GitHub Personal Access Token with appropriate permissions - for publishing the built artifacts in PRs)
 # 'APPLEID' (The username of your Apple developer account - for notarizing the mac artifacts)
 # 'APPLEID_PASSWORD' (An app-specific password - for notarizing the mac artifacts)
 # 'CSC_LINK' (The HTTPS link or local path to certificate - for code signing of mac artifacts)
@@ -128,270 +129,270 @@ jobs:
             git push origin $(git rev-parse --abbrev-ref HEAD) --no-verify
           fi
 
-  build_mac:
-    permissions:
-      # Required to upload/save artifact, otherwise you'll get
-      # "Error: Resource not accessible by integration"
-      contents: write
-      # Required to post comment, otherwise you'll get
-      # "Error: Resource not accessible by integration"
-      pull-requests: write
+  # build_mac:
+  #   permissions:
+  #     # Required to upload/save artifact, otherwise you'll get
+  #     # "Error: Resource not accessible by integration"
+  #     contents: write
+  #     # Required to post comment, otherwise you'll get
+  #     # "Error: Resource not accessible by integration"
+  #     pull-requests: write
 
-    name: 'macos ${{ github.event.inputs.message }}'
-    needs: check_updates
-    if: ${{ (needs.check_updates.outputs.should_run != 'false') && (github.event_name != 'workflow_dispatch' || (github.event_name == 'workflow_dispatch' && (contains(github.event.inputs.message, '[macOS]') || (!contains(github.event.inputs.message, '[macOS]') && !contains(github.event.inputs.message, '[Linux]') && !contains(github.event.inputs.message, '[Windows]'))))) }}
-    runs-on: macos-12
-    steps:
-      - name: Set env vars
-        run: |
-          echo "NPM_CACHE=$HOME/.npm" >> $GITHUB_ENV
-          echo "ELECTRON_CACHE=$HOME/.cache/electron" >> $GITHUB_ENV
-          echo "ELECTRON_BUILDER_CACHE=$HOME/.cache/electron-builder" >> $GITHUB_ENV
-          echo "MANUAL_REBUILD_ON_NIGHTLY=${{ github.event_name == 'workflow_dispatch' && contains(github.event.inputs.message, '[nightly branch]') }}" >> $GITHUB_ENV
-      - name: Checkout code along with submodules for the 'nightly' branch if the trigger event is 'scheduled' or this is a forced rebuild on the nightly branch
-        uses: actions/checkout@v4
-        if: ${{ github.event_name == 'schedule' || env.MANUAL_REBUILD_ON_NIGHTLY == 'true' }}
-        with:
-          submodules: recursive
-          fetch-depth: 0 # Note: Needed to be able to pull the 'develop' branch as well for merging
-          ref: nightly
-      - name: Checkout code along with submodules for any branch if the trigger event is NOT 'scheduled' and this is NOT a forced rebuild on the nightly branch
-        uses: actions/checkout@v4
-        if: ${{ github.event_name != 'schedule' && env.MANUAL_REBUILD_ON_NIGHTLY != 'true' }}
-        with:
-          submodules: recursive
-          fetch-depth: 0 # Note: Needed to be able to pull the 'develop' branch as well for merging
-      - name: Extract Git branch name from the currently checked out branch (not from the branch where this run was kicked off)
-        run: echo "GIT_BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)" >> $GITHUB_ENV
-        shell: bash
-      - name: Cache electron modules
-        uses: actions/cache@v3
-        env:
-          cache-name: cache-electron-modules
-        with:
-          key: ${{ runner.os }}-${{ env.cache-name }}-${{ secrets.CACHE_VERSION }}-${{ hashFiles('./pnpm-lock.yaml') }}
-          path: ${{ env.ELECTRON_CACHE }}
-      - name: Cache electron-builder modules
-        uses: actions/cache@v3
-        env:
-          cache-name: cache-electron-builder-modules
-        with:
-          key: ${{ runner.os }}-${{ env.cache-name }}-${{ secrets.CACHE_VERSION }}-${{ hashFiles('./pnpm-lock.yaml') }}
-          path: ${{ env.ELECTRON_BUILDER_CACHE }}
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2
-      - name: Use Node.js specified in the '.nvmrc' file
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: '.nvmrc'
-          cache: 'pnpm'
-      - name: Install node dependencies
-        uses: nick-fields/retry@v2
-        with:
-          command: pnpm i
-          timeout_minutes: 15
-          max_attempts: 3
-          retry_on: error
-      - name: Package recipes
-        run: pnpm i && pnpm lint && pnpm reformat-files && pnpm package
-        working-directory: ./recipes
-      - name: Run linter and tests
-        run: pnpm lint && pnpm test
-      - name: Build Ferdium without publish for any branch not 'nightly' and not 'release'
-        if: ${{ env.GIT_BRANCH_NAME != 'nightly' && env.GIT_BRANCH_NAME != 'release' }}
-        env:
-          CSC_IDENTITY_AUTO_DISCOVERY: false
-        run: pnpm build --publish never
-        shell: bash
-      - name: "Build Ferdium with publish for '${{ env.GIT_BRANCH_NAME }}' branch"
-        if: ${{ env.GIT_BRANCH_NAME == 'nightly' || env.GIT_BRANCH_NAME == 'release' }}
-        env:
-          GH_TOKEN: ${{ secrets.FERDIUM_PUBLISH_TOKEN }}
-          CSC_IDENTITY_AUTO_DISCOVERY: true
-          APPLEID: ${{ secrets.APPLEID }}
-          APPLEID_PASSWORD: ${{ secrets.APPLEID_PASSWORD }}
-          CSC_LINK: ${{ secrets.CSC_LINK }}
-          CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
-        run: pnpm build --publish always
-        shell: bash
-      - name: Pull request artifacts
-        uses: gavv/pull-request-artifacts@v2
-        with:
-          # Commit hash that triggered PR
-          commit: ${{ github.event.pull_request.head.sha }}
+  #   name: 'macos ${{ github.event.inputs.message }}'
+  #   needs: check_updates
+  #   if: ${{ (needs.check_updates.outputs.should_run != 'false') && (github.event_name != 'workflow_dispatch' || (github.event_name == 'workflow_dispatch' && (contains(github.event.inputs.message, '[macOS]') || (!contains(github.event.inputs.message, '[macOS]') && !contains(github.event.inputs.message, '[Linux]') && !contains(github.event.inputs.message, '[Windows]'))))) }}
+  #   runs-on: macos-12
+  #   steps:
+  #     - name: Set env vars
+  #       run: |
+  #         echo "NPM_CACHE=$HOME/.npm" >> $GITHUB_ENV
+  #         echo "ELECTRON_CACHE=$HOME/.cache/electron" >> $GITHUB_ENV
+  #         echo "ELECTRON_BUILDER_CACHE=$HOME/.cache/electron-builder" >> $GITHUB_ENV
+  #         echo "MANUAL_REBUILD_ON_NIGHTLY=${{ github.event_name == 'workflow_dispatch' && contains(github.event.inputs.message, '[nightly branch]') }}" >> $GITHUB_ENV
+  #     - name: Checkout code along with submodules for the 'nightly' branch if the trigger event is 'scheduled' or this is a forced rebuild on the nightly branch
+  #       uses: actions/checkout@v4
+  #       if: ${{ github.event_name == 'schedule' || env.MANUAL_REBUILD_ON_NIGHTLY == 'true' }}
+  #       with:
+  #         submodules: recursive
+  #         fetch-depth: 0 # Note: Needed to be able to pull the 'develop' branch as well for merging
+  #         ref: nightly
+  #     - name: Checkout code along with submodules for any branch if the trigger event is NOT 'scheduled' and this is NOT a forced rebuild on the nightly branch
+  #       uses: actions/checkout@v4
+  #       if: ${{ github.event_name != 'schedule' && env.MANUAL_REBUILD_ON_NIGHTLY != 'true' }}
+  #       with:
+  #         submodules: recursive
+  #         fetch-depth: 0 # Note: Needed to be able to pull the 'develop' branch as well for merging
+  #     - name: Extract Git branch name from the currently checked out branch (not from the branch where this run was kicked off)
+  #       run: echo "GIT_BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)" >> $GITHUB_ENV
+  #       shell: bash
+  #     - name: Cache electron modules
+  #       uses: actions/cache@v3
+  #       env:
+  #         cache-name: cache-electron-modules
+  #       with:
+  #         key: ${{ runner.os }}-${{ env.cache-name }}-${{ secrets.CACHE_VERSION }}-${{ hashFiles('./pnpm-lock.yaml') }}
+  #         path: ${{ env.ELECTRON_CACHE }}
+  #     - name: Cache electron-builder modules
+  #       uses: actions/cache@v3
+  #       env:
+  #         cache-name: cache-electron-builder-modules
+  #       with:
+  #         key: ${{ runner.os }}-${{ env.cache-name }}-${{ secrets.CACHE_VERSION }}-${{ hashFiles('./pnpm-lock.yaml') }}
+  #         path: ${{ env.ELECTRON_BUILDER_CACHE }}
+  #     - name: Install pnpm
+  #       uses: pnpm/action-setup@v2
+  #     - name: Use Node.js specified in the '.nvmrc' file
+  #       uses: actions/setup-node@v4
+  #       with:
+  #         node-version-file: '.nvmrc'
+  #         cache: 'pnpm'
+  #     - name: Install node dependencies
+  #       uses: nick-fields/retry@v2
+  #       with:
+  #         command: pnpm i
+  #         timeout_minutes: 15
+  #         max_attempts: 3
+  #         retry_on: error
+  #     - name: Package recipes
+  #       run: pnpm i && pnpm lint && pnpm reformat-files && pnpm package
+  #       working-directory: ./recipes
+  #     - name: Run linter and tests
+  #       run: pnpm lint && pnpm test
+  #     - name: Build Ferdium without publish for any branch not 'nightly' and not 'release'
+  #       if: ${{ env.GIT_BRANCH_NAME != 'nightly' && env.GIT_BRANCH_NAME != 'release' }}
+  #       env:
+  #         CSC_IDENTITY_AUTO_DISCOVERY: false
+  #       run: pnpm build --publish never
+  #       shell: bash
+  #     - name: "Build Ferdium with publish for '${{ env.GIT_BRANCH_NAME }}' branch"
+  #       if: ${{ env.GIT_BRANCH_NAME == 'nightly' || env.GIT_BRANCH_NAME == 'release' }}
+  #       env:
+  #         GH_TOKEN: ${{ secrets.FERDIUM_PUBLISH_TOKEN }}
+  #         CSC_IDENTITY_AUTO_DISCOVERY: true
+  #         APPLEID: ${{ secrets.APPLEID }}
+  #         APPLEID_PASSWORD: ${{ secrets.APPLEID_PASSWORD }}
+  #         CSC_LINK: ${{ secrets.CSC_LINK }}
+  #         CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
+  #       run: pnpm build --publish always
+  #       shell: bash
+  #     - name: Pull request artifacts
+  #       uses: gavv/pull-request-artifacts@v2
+  #       with:
+  #         # Commit hash that triggered PR
+  #         commit: ${{ github.event.pull_request.head.sha }}
 
-          # Token for current repo (used to post PR comment)
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
+  #         # Token for current repo (used to post PR comment)
+  #         repo-token: ${{ secrets.GITHUB_TOKEN }}
 
-          # Optional, uncomment to upload to another repository
-          #artifacts-token: ${{ secrets.ANOTHER_TOKEN_WITH_PUSH_ACCESS }}
-          #artifacts-repo: some/repository_name
+  #         # Optional, uncomment to upload to another repository
+  #         #artifacts-token: ${{ secrets.ANOTHER_TOKEN_WITH_PUSH_ACCESS }}
+  #         #artifacts-repo: some/repository_name
 
-          # Optional, uncomment to upload artifacts to specific branch, otherwise
-          # the default branch is used.
-          # Note that usually the main branch is protected by rules, so it's not
-          # possible to upload there.
-          # Perhaps, the best solution is to create an empty unprotected branch
-          # dedicated for artifacts.
-          # See README for details.
-          artifacts-branch: artifacts
+  #         # Optional, uncomment to upload artifacts to specific branch, otherwise
+  #         # the default branch is used.
+  #         # Note that usually the main branch is protected by rules, so it's not
+  #         # possible to upload there.
+  #         # Perhaps, the best solution is to create an empty unprotected branch
+  #         # dedicated for artifacts.
+  #         # See README for details.
+  #         artifacts-branch: artifacts
 
-          # Optional, uncomment to preserve artifacts path and add prefix.
-          # By default artifacts are uploaded to "pr<pr_number>-<artifact_basename>".
-          # With options below, artifacts will be uploaded to "my_prs/<pr_number>/<artifact_path>".
-          artifacts-prefix: "prs/${{ github.event.number }}/"
-          preserve-path: true
+  #         # Optional, uncomment to preserve artifacts path and add prefix.
+  #         # By default artifacts are uploaded to "pr<pr_number>-<artifact_basename>".
+  #         # With options below, artifacts will be uploaded to "my_prs/<pr_number>/<artifact_path>".
+  #         artifacts-prefix: "prs/${{ github.event.number }}/"
+  #         preserve-path: true
 
-          # Optional, uncomment to use non-default title and style.
-          #comment-title: "My artifacts"
-          #comment-message: "My message"
-          #comment-style: list
+  #         # Optional, uncomment to use non-default title and style.
+  #         #comment-title: "My artifacts"
+  #         #comment-message: "My message"
+  #         #comment-style: list
 
-          # Whitespace-separated list of files to upload
-          artifacts: |
-            out/
+  #         # Whitespace-separated list of files to upload
+  #         artifacts: |
+  #           out/
 
-  build_linux:
-    permissions:
-      # Required to upload/save artifact, otherwise you'll get
-      # "Error: Resource not accessible by integration"
-      contents: write
-      # Required to post comment, otherwise you'll get
-      # "Error: Resource not accessible by integration"
-      pull-requests: write
+  # build_linux:
+  #   permissions:
+  #     # Required to upload/save artifact, otherwise you'll get
+  #     # "Error: Resource not accessible by integration"
+  #     contents: write
+  #     # Required to post comment, otherwise you'll get
+  #     # "Error: Resource not accessible by integration"
+  #     pull-requests: write
 
-    name: 'ubuntu ${{ github.event.inputs.message }}'
-    needs: check_updates
-    if: ${{ (needs.check_updates.outputs.should_run != 'false') && (github.event_name != 'workflow_dispatch' || (github.event_name == 'workflow_dispatch' && (contains(github.event.inputs.message, '[Linux]') || (!contains(github.event.inputs.message, '[macOS]') && !contains(github.event.inputs.message, '[Linux]') && !contains(github.event.inputs.message, '[Windows]'))))) }}
-    runs-on: ubuntu-22.04
-    steps:
-      - name: Set env vars
-        run: |
-          echo "NPM_CACHE=$HOME/.npm" >> $GITHUB_ENV
-          echo "ELECTRON_CACHE=$HOME/.cache/electron" >> $GITHUB_ENV
-          echo "ELECTRON_BUILDER_CACHE=$HOME/.cache/electron-builder" >> $GITHUB_ENV
-          echo "MANUAL_REBUILD_ON_NIGHTLY=${{ github.event_name == 'workflow_dispatch' && contains(github.event.inputs.message, '[nightly branch]') }}" >> $GITHUB_ENV
-      - name: Checkout code along with submodules for the 'nightly' branch if the trigger event is 'scheduled' or this is a forced rebuild on the nightly branch
-        uses: actions/checkout@v4
-        if: ${{ github.event_name == 'schedule' || env.MANUAL_REBUILD_ON_NIGHTLY == 'true' }}
-        with:
-          submodules: recursive
-          fetch-depth: 0 # Note: Needed to be able to pull the 'develop' branch as well for merging
-          ref: nightly
-      - name: Checkout code along with submodules for any branch if the trigger event is NOT 'scheduled' and this is NOT a forced rebuild on the nightly branch
-        uses: actions/checkout@v4
-        if: ${{ github.event_name != 'schedule' && env.MANUAL_REBUILD_ON_NIGHTLY != 'true' }}
-        with:
-          submodules: recursive
-          fetch-depth: 0 # Note: Needed to be able to pull the 'develop' branch as well for merging
-      - name: Extract Git branch name from the currently checked out branch (not from the branch where this run was kicked off)
-        run: echo "GIT_BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)" >> $GITHUB_ENV
-        shell: bash
-      - name: Cache electron modules
-        uses: actions/cache@v3
-        env:
-          cache-name: cache-electron-modules
-        with:
-          key: ${{ runner.os }}-${{ env.cache-name }}-${{ secrets.CACHE_VERSION }}-${{ hashFiles('./pnpm-lock.yaml') }}
-          path: ${{ env.ELECTRON_CACHE }}
-      - name: Cache electron-builder modules
-        uses: actions/cache@v3
-        env:
-          cache-name: cache-electron-builder-modules
-        with:
-          key: ${{ runner.os }}-${{ env.cache-name }}-${{ secrets.CACHE_VERSION }}-${{ hashFiles('./pnpm-lock.yaml') }}
-          path: ${{ env.ELECTRON_BUILDER_CACHE }}
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2
-      - name: Use Node.js specified in the '.nvmrc' file
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: '.nvmrc'
-          cache: 'pnpm'
-      - name: Install node dependencies
-        uses: nick-fields/retry@v2
-        with:
-          command: pnpm i
-          timeout_minutes: 15
-          max_attempts: 3
-          retry_on: error
-      - name: Figure out used package.json version
-        run: |
-          PACKAGE_VERSION="$(node -p 'require("./package.json").version')"
-          echo "PACKAGE_VERSION=$PACKAGE_VERSION" >> $GITHUB_ENV
-          if [[ "$GIT_BRANCH_NAME" == "nightly" ]]; then
-            echo "SNAP_PUBLISH_REPO=nightlies" >> $GITHUB_ENV
-            echo "SNAP_PUBLISH_CHANNEL=edge" >> $GITHUB_ENV
-          elif [[ "$GIT_BRANCH_NAME" == "release" ]]; then
-            echo "SNAP_PUBLISH_REPO=ferdium" >> $GITHUB_ENV
-            if [[ "$PACKAGE_VERSION" =~ "beta" ]]; then
-              echo "SNAP_PUBLISH_CHANNEL=beta" >> $GITHUB_ENV
-            else
-              echo "SNAP_PUBLISH_CHANNEL=stable" >> $GITHUB_ENV
-            fi
-          else
-            echo "SNAP_PUBLISH_REPO=none" >> $GITHUB_ENV
-            echo "SNAP_PUBLISH_CHANNEL=none" >> $GITHUB_ENV
-          fi
-        shell: bash
-      - name: Package recipes
-        run: pnpm i && pnpm lint && pnpm reformat-files && pnpm package
-        working-directory: ./recipes
-      - name: Run linter and tests
-        run: pnpm lint && pnpm test
-      - name: Build Ferdium without publish for any branch not 'nightly' and not 'release'
-        if: ${{ env.GIT_BRANCH_NAME != 'nightly' && env.GIT_BRANCH_NAME != 'release' }}
-        env:
-          CSC_IDENTITY_AUTO_DISCOVERY: false
-        run: pnpm build --publish never
-        shell: bash
-      - name: "Build Ferdium with publish for '${{ env.GIT_BRANCH_NAME }}' branch"
-        if: ${{ env.GIT_BRANCH_NAME == 'nightly' || env.GIT_BRANCH_NAME == 'release' }}
-        env:
-          GH_TOKEN: ${{ secrets.FERDIUM_PUBLISH_TOKEN }}
-          CSC_IDENTITY_AUTO_DISCOVERY: false
-          SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_LOGIN }} # Note: Login no longer required https://forum.snapcraft.io/t/snapcraft-authentication-options/30473/21
-        run: |
-          sudo snap install snapcraft --channel=7.x/stable --classic
-          pnpm build --publish always -c.snap.publish.repo=$SNAP_PUBLISH_REPO -c.snap.publish.channels=$SNAP_PUBLISH_CHANNEL
-          snapcraft logout
-        shell: bash
-      - name: Pull request artifacts
-        uses: gavv/pull-request-artifacts@v2
-        with:
-          # Commit hash that triggered PR
-          commit: ${{ github.event.pull_request.head.sha }}
+  #   name: 'ubuntu ${{ github.event.inputs.message }}'
+  #   needs: check_updates
+  #   if: ${{ (needs.check_updates.outputs.should_run != 'false') && (github.event_name != 'workflow_dispatch' || (github.event_name == 'workflow_dispatch' && (contains(github.event.inputs.message, '[Linux]') || (!contains(github.event.inputs.message, '[macOS]') && !contains(github.event.inputs.message, '[Linux]') && !contains(github.event.inputs.message, '[Windows]'))))) }}
+  #   runs-on: ubuntu-22.04
+  #   steps:
+  #     - name: Set env vars
+  #       run: |
+  #         echo "NPM_CACHE=$HOME/.npm" >> $GITHUB_ENV
+  #         echo "ELECTRON_CACHE=$HOME/.cache/electron" >> $GITHUB_ENV
+  #         echo "ELECTRON_BUILDER_CACHE=$HOME/.cache/electron-builder" >> $GITHUB_ENV
+  #         echo "MANUAL_REBUILD_ON_NIGHTLY=${{ github.event_name == 'workflow_dispatch' && contains(github.event.inputs.message, '[nightly branch]') }}" >> $GITHUB_ENV
+  #     - name: Checkout code along with submodules for the 'nightly' branch if the trigger event is 'scheduled' or this is a forced rebuild on the nightly branch
+  #       uses: actions/checkout@v4
+  #       if: ${{ github.event_name == 'schedule' || env.MANUAL_REBUILD_ON_NIGHTLY == 'true' }}
+  #       with:
+  #         submodules: recursive
+  #         fetch-depth: 0 # Note: Needed to be able to pull the 'develop' branch as well for merging
+  #         ref: nightly
+  #     - name: Checkout code along with submodules for any branch if the trigger event is NOT 'scheduled' and this is NOT a forced rebuild on the nightly branch
+  #       uses: actions/checkout@v4
+  #       if: ${{ github.event_name != 'schedule' && env.MANUAL_REBUILD_ON_NIGHTLY != 'true' }}
+  #       with:
+  #         submodules: recursive
+  #         fetch-depth: 0 # Note: Needed to be able to pull the 'develop' branch as well for merging
+  #     - name: Extract Git branch name from the currently checked out branch (not from the branch where this run was kicked off)
+  #       run: echo "GIT_BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)" >> $GITHUB_ENV
+  #       shell: bash
+  #     - name: Cache electron modules
+  #       uses: actions/cache@v3
+  #       env:
+  #         cache-name: cache-electron-modules
+  #       with:
+  #         key: ${{ runner.os }}-${{ env.cache-name }}-${{ secrets.CACHE_VERSION }}-${{ hashFiles('./pnpm-lock.yaml') }}
+  #         path: ${{ env.ELECTRON_CACHE }}
+  #     - name: Cache electron-builder modules
+  #       uses: actions/cache@v3
+  #       env:
+  #         cache-name: cache-electron-builder-modules
+  #       with:
+  #         key: ${{ runner.os }}-${{ env.cache-name }}-${{ secrets.CACHE_VERSION }}-${{ hashFiles('./pnpm-lock.yaml') }}
+  #         path: ${{ env.ELECTRON_BUILDER_CACHE }}
+  #     - name: Install pnpm
+  #       uses: pnpm/action-setup@v2
+  #     - name: Use Node.js specified in the '.nvmrc' file
+  #       uses: actions/setup-node@v4
+  #       with:
+  #         node-version-file: '.nvmrc'
+  #         cache: 'pnpm'
+  #     - name: Install node dependencies
+  #       uses: nick-fields/retry@v2
+  #       with:
+  #         command: pnpm i
+  #         timeout_minutes: 15
+  #         max_attempts: 3
+  #         retry_on: error
+  #     - name: Figure out used package.json version
+  #       run: |
+  #         PACKAGE_VERSION="$(node -p 'require("./package.json").version')"
+  #         echo "PACKAGE_VERSION=$PACKAGE_VERSION" >> $GITHUB_ENV
+  #         if [[ "$GIT_BRANCH_NAME" == "nightly" ]]; then
+  #           echo "SNAP_PUBLISH_REPO=nightlies" >> $GITHUB_ENV
+  #           echo "SNAP_PUBLISH_CHANNEL=edge" >> $GITHUB_ENV
+  #         elif [[ "$GIT_BRANCH_NAME" == "release" ]]; then
+  #           echo "SNAP_PUBLISH_REPO=ferdium" >> $GITHUB_ENV
+  #           if [[ "$PACKAGE_VERSION" =~ "beta" ]]; then
+  #             echo "SNAP_PUBLISH_CHANNEL=beta" >> $GITHUB_ENV
+  #           else
+  #             echo "SNAP_PUBLISH_CHANNEL=stable" >> $GITHUB_ENV
+  #           fi
+  #         else
+  #           echo "SNAP_PUBLISH_REPO=none" >> $GITHUB_ENV
+  #           echo "SNAP_PUBLISH_CHANNEL=none" >> $GITHUB_ENV
+  #         fi
+  #       shell: bash
+  #     - name: Package recipes
+  #       run: pnpm i && pnpm lint && pnpm reformat-files && pnpm package
+  #       working-directory: ./recipes
+  #     - name: Run linter and tests
+  #       run: pnpm lint && pnpm test
+  #     - name: Build Ferdium without publish for any branch not 'nightly' and not 'release'
+  #       if: ${{ env.GIT_BRANCH_NAME != 'nightly' && env.GIT_BRANCH_NAME != 'release' }}
+  #       env:
+  #         CSC_IDENTITY_AUTO_DISCOVERY: false
+  #       run: pnpm build --publish never
+  #       shell: bash
+  #     - name: "Build Ferdium with publish for '${{ env.GIT_BRANCH_NAME }}' branch"
+  #       if: ${{ env.GIT_BRANCH_NAME == 'nightly' || env.GIT_BRANCH_NAME == 'release' }}
+  #       env:
+  #         GH_TOKEN: ${{ secrets.FERDIUM_PUBLISH_TOKEN }}
+  #         CSC_IDENTITY_AUTO_DISCOVERY: false
+  #         SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_LOGIN }} # Note: Login no longer required https://forum.snapcraft.io/t/snapcraft-authentication-options/30473/21
+  #       run: |
+  #         sudo snap install snapcraft --channel=7.x/stable --classic
+  #         pnpm build --publish always -c.snap.publish.repo=$SNAP_PUBLISH_REPO -c.snap.publish.channels=$SNAP_PUBLISH_CHANNEL
+  #         snapcraft logout
+  #       shell: bash
+  #     - name: Pull request artifacts
+  #       uses: gavv/pull-request-artifacts@v2
+  #       with:
+  #         # Commit hash that triggered PR
+  #         commit: ${{ github.event.pull_request.head.sha }}
 
-          # Token for current repo (used to post PR comment)
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
+  #         # Token for current repo (used to post PR comment)
+  #         repo-token: ${{ secrets.GITHUB_TOKEN }}
 
-          # Optional, uncomment to upload to another repository
-          #artifacts-token: ${{ secrets.ANOTHER_TOKEN_WITH_PUSH_ACCESS }}
-          #artifacts-repo: some/repository_name
+  #         # Optional, uncomment to upload to another repository
+  #         #artifacts-token: ${{ secrets.ANOTHER_TOKEN_WITH_PUSH_ACCESS }}
+  #         #artifacts-repo: some/repository_name
 
-          # Optional, uncomment to upload artifacts to specific branch, otherwise
-          # the default branch is used.
-          # Note that usually the main branch is protected by rules, so it's not
-          # possible to upload there.
-          # Perhaps, the best solution is to create an empty unprotected branch
-          # dedicated for artifacts.
-          # See README for details.
-          artifacts-branch: artifacts
+  #         # Optional, uncomment to upload artifacts to specific branch, otherwise
+  #         # the default branch is used.
+  #         # Note that usually the main branch is protected by rules, so it's not
+  #         # possible to upload there.
+  #         # Perhaps, the best solution is to create an empty unprotected branch
+  #         # dedicated for artifacts.
+  #         # See README for details.
+  #         artifacts-branch: artifacts
 
-          # Optional, uncomment to preserve artifacts path and add prefix.
-          # By default artifacts are uploaded to "pr<pr_number>-<artifact_basename>".
-          # With options below, artifacts will be uploaded to "my_prs/<pr_number>/<artifact_path>".
-          artifacts-prefix: "prs/${{ github.event.number }}/"
-          preserve-path: true
+  #         # Optional, uncomment to preserve artifacts path and add prefix.
+  #         # By default artifacts are uploaded to "pr<pr_number>-<artifact_basename>".
+  #         # With options below, artifacts will be uploaded to "my_prs/<pr_number>/<artifact_path>".
+  #         artifacts-prefix: "prs/${{ github.event.number }}/"
+  #         preserve-path: true
 
-          # Optional, uncomment to use non-default title and style.
-          #comment-title: "My artifacts"
-          #comment-message: "My message"
-          #comment-style: list
+  #         # Optional, uncomment to use non-default title and style.
+  #         #comment-title: "My artifacts"
+  #         #comment-message: "My message"
+  #         #comment-style: list
 
-          # Whitespace-separated list of files to upload
-          artifacts: |
-            out/
+  #         # Whitespace-separated list of files to upload
+  #         artifacts: |
+  #           out/
 
   build_windows:
     permissions:
@@ -488,13 +489,14 @@ jobs:
         run: pnpm build --publish always
         shell: bash
       - name: Pull request artifacts
+        if: ${{ github.event_name == 'pull_request' }}
         uses: gavv/pull-request-artifacts@v2
         with:
           # Commit hash that triggered PR
           commit: ${{ github.event.pull_request.head.sha }}
 
           # Token for current repo (used to post PR comment)
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          repo-token: ${{ secrets.ARTIFACT_TOKEN }}
 
           # Optional, uncomment to upload to another repository
           #artifacts-token: ${{ secrets.ANOTHER_TOKEN_WITH_PUSH_ACCESS }}
