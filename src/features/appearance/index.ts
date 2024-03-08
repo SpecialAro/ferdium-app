@@ -2,7 +2,7 @@ import color from 'color';
 import { reaction } from 'mobx';
 import TopBarProgress from 'react-topbar-progress-indicator';
 
-import { pathExistsSync, readFileSync } from 'fs-extra';
+import { pathExistsSync, readFileSync, readdirSync } from 'fs-extra';
 import { isWindows, isLinux } from '../../environment';
 import {
   DEFAULT_APP_SETTINGS,
@@ -36,9 +36,34 @@ function darkenAbsolute(originalColor, absoluteChange) {
   return originalColor.lightness(originalLightness - absoluteChange);
 }
 
+function readCssFileInFolder(folderPath) {
+  if (pathExistsSync(folderPath)) {
+    const files = readdirSync(folderPath, {
+      encoding: 'utf8',
+      withFileTypes: true,
+    });
+
+    let parsedFiles = '';
+    for (const file of files) {
+      if (file.isFile() && file.name.endsWith('.css')) {
+        parsedFiles += readFileSync(`${folderPath}/${file.name}`, 'utf8');
+      }
+
+      if (file.isDirectory()) {
+        parsedFiles += readCssFileInFolder(`${folderPath}/${file.name}`);
+      }
+    }
+
+    return parsedFiles;
+  }
+  return '';
+}
+
 function generateUserCustomCSS() {
-  const path = userDataPath('config', 'custom.css');
-  return pathExistsSync(path) ? readFileSync(path).toString() : '';
+  const path = userDataPath('config', 'theme');
+
+  // get all css files in the theme folder
+  return readCssFileInFolder(path);
 }
 
 function generateAccentStyle(accentColorStr) {
