@@ -8,6 +8,7 @@ import ui from './ui';
 import app from './app';
 import user from './user';
 import settings from './settings';
+import appearence from './appearence';
 import requests from './requests';
 import workspaces from '../features/workspaces/actions';
 import { todoActions } from '../features/todos/actions';
@@ -21,6 +22,7 @@ const actions = {
   user,
   settings,
   requests,
+  appearence,
 };
 
 export default Object.assign(

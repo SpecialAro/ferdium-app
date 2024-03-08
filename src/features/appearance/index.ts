@@ -449,7 +449,7 @@ function updateProgressbar(settings) {
   });
 }
 
-function updateStyle(settings, app) {
+export function updateStyle(settings, app) {
   const style = generateStyle(settings, app);
   setAppearance(style);
   updateProgressbar(settings);

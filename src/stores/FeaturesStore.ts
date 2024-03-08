@@ -16,7 +16,7 @@ import quickSwitch from '../features/quickSwitch';
 import publishDebugInfo from '../features/publishDebugInfo';
 import communityRecipes from '../features/communityRecipes';
 import todos from '../features/todos';
-import appearance from '../features/appearance';
+import appearance, { updateStyle } from '../features/appearance';
 import TypedStore from './lib/TypedStore';
 
 export default class FeaturesStore extends TypedStore {
@@ -26,6 +26,14 @@ export default class FeaturesStore extends TypedStore {
     super(stores, api, actions);
 
     makeObservable(this);
+
+    // Register action handlers
+    this.actions.appearence.reload.listen(this._reloadAppearance.bind(this));
+  }
+
+  @action _reloadAppearance(): void {
+    const { settings, app } = this.stores;
+    updateStyle(settings.all.app, app);
   }
 
   @observable defaultFeaturesRequest = new CachedRequest(
