@@ -28,7 +28,7 @@ export default class FeaturesStore extends TypedStore {
     makeObservable(this);
 
     // Register action handlers
-    this.actions.appearence.reload.listen(this._reloadAppearance.bind(this));
+    this.actions.appearance.reload.listen(this._reloadAppearance.bind(this));
   }
 
   @action _reloadAppearance(): void {
