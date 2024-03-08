@@ -35,6 +35,10 @@ const messages = defineMessages({
     id: 'settings.navigation.releaseNotes',
     defaultMessage: 'Release Notes',
   },
+  themes: {
+    id: 'settings.navigation.themes',
+    defaultMessage: 'Themes Market',
+  },
   supportFerdium: {
     id: 'settings.navigation.supportFerdium',
     defaultMessage: 'About Ferdium',
@@ -158,6 +162,16 @@ class SettingsNavigation extends Component<IProps> {
                 stores!.app.updateStatusTypes.DOWNLOADED) && (
               <span className="update-available">•</span>
             )}
+        </NavLink>
+        <NavLink
+          to="/settings/themes"
+          className={({ isActive }) =>
+            isActive
+              ? 'settings-navigation__link is-active'
+              : 'settings-navigation__link'
+          }
+        >
+          {intl.formatMessage(messages.themes)}
         </NavLink>
         <NavLink
           to="/settings/releasenotes"

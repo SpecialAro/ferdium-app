@@ -733,6 +733,11 @@ class EditSettingsForm extends Component<IProps, IState> {
                 </H2>
                 {isMac && <Toggle {...form.$('showDragArea').bind()} />}
 
+                <Input
+                  onChange={e => this.submit(e)}
+                  {...form.$('selectedTheme').bind()}
+                />
+
                 <Toggle {...form.$('adaptableDarkMode').bind()} />
                 {!isAdaptableDarkModeEnabled && (
                   <Toggle {...form.$('darkMode').bind()} />

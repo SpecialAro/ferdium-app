@@ -17,6 +17,7 @@ import AccountScreen from './containers/settings/AccountScreen';
 import TeamScreen from './containers/settings/TeamScreen';
 import EditUserScreen from './containers/settings/EditUserScreen';
 import EditSettingsScreen from './containers/settings/EditSettingsScreen';
+import ThemeScreen from './containers/settings/ThemeScreen';
 import InviteSettingsScreen from './containers/settings/InviteScreen';
 import SupportFerdiumScreen from './containers/settings/SupportScreen';
 import ReleaseNotesScreen from './containers/settings/ReleaseNotesScreen';
@@ -189,6 +190,11 @@ class FerdiumRoutes extends Component<IProps> {
               <Route
                 path="/settings/releasenotes"
                 element={<ReleaseNotesScreen {...this.props} />}
+              />
+              <Route
+                path="/settings/themes"
+                // @ts-expect-error Fix me
+                element={<ThemeScreen {...this.props} />}
               />
             </Route>
           </Route>

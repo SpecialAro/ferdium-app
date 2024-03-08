@@ -59,8 +59,8 @@ function readCssFileInFolder(folderPath) {
   return '';
 }
 
-function generateUserCustomCSS() {
-  const path = userDataPath('config', 'theme');
+function generateUserCustomCSS(selectedTheme: string) {
+  const path = userDataPath('config', 'themes', selectedTheme);
 
   // get all css files in the theme folder
   return readCssFileInFolder(path);
@@ -420,6 +420,7 @@ function generateStyle(settings, app) {
     useHorizontalStyle,
     alwaysShowWorkspaces,
     showServiceName,
+    selectedTheme,
   } = settings;
 
   const { isFullScreen } = app;
@@ -459,7 +460,9 @@ function generateStyle(settings, app) {
     style += generateOpenWorkspaceStyle();
   }
 
-  style += generateUserCustomCSS();
+  if (selectedTheme !== 'default') {
+    style += generateUserCustomCSS(selectedTheme);
+  }
 
   return style;
 }
@@ -493,6 +496,7 @@ export default function initAppearance(stores) {
       settings.all.app.serviceRibbonWidth,
       settings.all.app.iconSize,
       settings.all.app.showDragArea,
+      settings.all.app.selectedTheme,
       settings.all.app.sidebarServicesLocation,
       settings.all.app.useGrayscaleServices,
       settings.all.app.grayscaleServicesDim,

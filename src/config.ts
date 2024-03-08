@@ -365,6 +365,7 @@ export const DEFAULT_APP_SETTINGS = {
   showServiceName: false,
   showMessageBadgeWhenMuted: true,
   showDragArea: false,
+  selectedTheme: 'default',
   enableSpellchecking: true,
   enableTranslator: false,
   spellcheckerLanguage: 'en-us',

@@ -39,7 +39,7 @@ import globalMessages from '../../i18n/globalMessages';
 import { importExportURL } from '../../api/apiBase';
 import { ifUndefined } from '../../jsUtils';
 
-const debug = require('../../preload-safe-debug')('Ferdium:EditSettingsScreen');
+const debug = require('../../preload-safe-debug')('Ferdium:ThemeScreen');
 
 const messages = defineMessages({
   autoLaunchOnStart: {
@@ -339,18 +339,15 @@ const messages = defineMessages({
   },
 });
 
-interface EditSettingsScreenProps extends StoresProps, WrappedComponentProps {}
+interface ThemeScreenProps extends StoresProps, WrappedComponentProps {}
 
-interface EditSettingsScreenState {
+interface ThemeScreenState {
   lockedPassword: string;
 }
 
 @inject('stores', 'actions')
 @observer
-class EditSettingsScreen extends Component<
-  EditSettingsScreenProps,
-  EditSettingsScreenState
-> {
+class ThemeScreen extends Component<ThemeScreenProps, ThemeScreenState> {
   constructor(props) {
     super(props);
 
@@ -1317,4 +1314,4 @@ class EditSettingsScreen extends Component<
   }
 }
 
-export default injectIntl(EditSettingsScreen);
+export default injectIntl(ThemeScreen);
