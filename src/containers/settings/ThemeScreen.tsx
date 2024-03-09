@@ -41,6 +41,7 @@ import { importExportURL } from '../../api/apiBase';
 import { ifUndefined } from '../../jsUtils';
 import { H1, H2 } from '../../components/ui/headline';
 import { userDataPath } from '../../environment-remote';
+import Input from '../../components/ui/input';
 
 const debug = require('../../preload-safe-debug')('Ferdium:ThemeScreen');
 
@@ -61,7 +62,9 @@ const messages = defineMessages({
 
 interface ThemeScreenProps extends StoresProps, WrappedComponentProps {}
 
-interface ThemeScreenState {}
+interface ThemeScreenState {
+  search: string;
+}
 
 @inject('stores', 'actions')
 @observer
@@ -69,7 +72,9 @@ class ThemeScreen extends Component<ThemeScreenProps, ThemeScreenState> {
   constructor(props) {
     super(props);
 
-    this.state = {};
+    this.state = {
+      search: '',
+    };
   }
 
   render(): ReactElement {
@@ -77,12 +82,26 @@ class ThemeScreen extends Component<ThemeScreenProps, ThemeScreenState> {
 
     const installedThemesPath = userDataPath('config', 'themes', 'themes.json');
 
-    const installedThemes: ITheme[] = readJSONSync(installedThemesPath);
+    let installedThemes: ITheme[] = readJSONSync(installedThemesPath);
 
-    const notInstalledThemes = theme.filter(
+    let notInstalledThemes = theme.filter(
       theme =>
         !installedThemes.some(installedTheme => installedTheme.id === theme.id),
     );
+
+    const search = this.state.search.toLowerCase();
+
+    if (search) {
+      installedThemes = installedThemes.filter(theme =>
+        theme.name.toLowerCase().includes(search),
+      );
+      notInstalledThemes = notInstalledThemes.filter(theme =>
+        theme.name.toLowerCase().includes(search),
+      );
+    } else {
+      installedThemes = installedThemes.filter(Boolean);
+      notInstalledThemes = notInstalledThemes.filter(Boolean);
+    }
 
     return (
       <ErrorBoundary>
@@ -99,38 +118,52 @@ class ThemeScreen extends Component<ThemeScreenProps, ThemeScreenState> {
                 height: '100%',
               }}
             >
+              <Input
+                placeholder="Search"
+                onChange={e => {
+                  this.setState({ search: e.target.value });
+                }}
+              />
               <H2>{intl.formatMessage(messages.installedSection)}</H2>
               <div>
                 <p>Installed themes will be listed here</p>
                 <div style={{ display: 'block', width: '90%', height: 200 }}>
-                  <Slider {...simpleSlideSettings}>
-                    {installedThemes.map(theme => {
-                      return (
-                        <div key={theme.id}>
-                          <h3>{theme.name}</h3>
-                          <p>{theme.description}</p>
-                          <img src={theme.preview} alt={theme.name} />
-                        </div>
-                      );
-                    })}
-                  </Slider>
+                  {installedThemes.length > 0 ? (
+                    <Slider {...simpleSlideSettings}>
+                      {installedThemes.map(theme => {
+                        return (
+                          <div key={theme.id}>
+                            <h3>{theme.name}</h3>
+                            <p>{theme.description}</p>
+                            <img src={theme.preview} alt={theme.name} />
+                          </div>
+                        );
+                      })}
+                    </Slider>
+                  ) : (
+                    <p>No installed themes found.</p>
+                  )}
                 </div>
               </div>
               <H2>{intl.formatMessage(messages.notInstalledSection)}</H2>
               <div>
                 <p> Not installed themes will be listed here</p>
                 <div style={{ display: 'block', width: '90%', height: 200 }}>
-                  <Slider {...simpleSlideSettings}>
-                    {notInstalledThemes.map(theme => {
-                      return (
-                        <div key={theme.id}>
-                          <h3>{theme.name}</h3>
-                          <p>{theme.description}</p>
-                          <img src={theme.preview} alt={theme.name} />
-                        </div>
-                      );
-                    })}
-                  </Slider>
+                  {installedThemes.length > 0 ? (
+                    <Slider {...simpleSlideSettings}>
+                      {notInstalledThemes.map(theme => {
+                        return (
+                          <div key={theme.id}>
+                            <h3>{theme.name}</h3>
+                            <p>{theme.description}</p>
+                            <img src={theme.preview} alt={theme.name} />
+                          </div>
+                        );
+                      })}
+                    </Slider>
+                  ) : (
+                    <p>No found.</p>
+                  )}
                 </div>
               </div>
             </div>
