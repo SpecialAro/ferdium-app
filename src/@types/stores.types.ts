@@ -6,6 +6,7 @@ import User from '../models/User';
 import Request from '../stores/lib/Request';
 import CachedRequest from '../stores/lib/CachedRequest';
 import Reaction from '../stores/lib/Reaction';
+import { ITheme } from '../models/Theme';
 
 // TODO: This file will be removed in the future when all stores are
 // correctly typed and the use of these interfaces are obsolete.
@@ -21,6 +22,7 @@ export interface FerdiumStores {
   router: RouterStore;
   services: ServicesStore;
   settings: SettingsStore;
+  themes: ThemesStore;
   todos: TodosStore;
   ui: UIStore;
   user: UserStore;
@@ -41,6 +43,7 @@ export interface Stores {
   todos: TodosStore;
   ui: UIStore;
   user: UserStore;
+  themes: ThemesStore;
   workspaces: WorkspacesStore;
 }
 
@@ -54,6 +57,7 @@ interface Actions {
   todos: TodosStore;
   ui: UIStore;
   user: UserStore;
+  themes: ThemesStore;
   workspaces: WorkspacesStore;
 }
 
@@ -243,6 +247,15 @@ interface SettingsStore extends TypedStore {
   proxy: () => void;
   service: ServicesStore;
   stats: () => void;
+}
+
+interface ThemesStore extends TypedStore {
+  availableThemes: ITheme[];
+  installedThemes: ITheme[];
+  notInstalledThemes: ITheme[];
+  _loadThemes: () => void;
+  loadLocalThemes: () => void;
+  changeSelectedTheme: (theme: ITheme) => void;
 }
 
 interface TodosStore extends TypedStore {

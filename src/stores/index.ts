@@ -14,11 +14,13 @@ import GlobalErrorStore from './GlobalErrorStore';
 import { workspaceStore } from '../features/workspaces';
 import { communityRecipesStore } from '../features/communityRecipes';
 import { todosStore } from '../features/todos';
+import ThemesStore from './ThemesStore';
 
 export interface RealStores {
   router: RouterStore;
   app: AppStore;
   user: UserStore;
+  themes: ThemesStore;
   features: FeaturesStore;
   settings: SettingsStore;
   services: ServicesStore;
@@ -43,6 +45,7 @@ export default (
     app: new AppStore(stores, api, actions),
     user: new UserStore(stores, api, actions),
     features: new FeaturesStore(stores, api, actions),
+    themes: new ThemesStore(stores, api, actions),
     settings: new SettingsStore(stores, api, actions),
     services: new ServicesStore(stores, api, actions),
     recipes: new RecipesStore(stores, api, actions),

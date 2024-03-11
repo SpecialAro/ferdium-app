@@ -17,17 +17,25 @@ import {
 import InstallDesktopIcon from '@mui/icons-material/InstallDesktop';
 import InfoIcon from '@mui/icons-material/Info';
 import DeleteForeverOutlinedIcon from '@mui/icons-material/DeleteForeverOutlined';
+import { WrappedComponentProps } from 'react-intl';
 import { ITheme } from '../../../models/Theme';
+import { StoresProps } from '../../../@types/ferdium-components.types';
+import { theme } from '../../../themes';
 
-interface IProps {
+interface MediaPProps extends StoresProps, WrappedComponentProps {
   themes: ITheme[];
   searchTerm: string;
+  activeSetttingsTab: string;
 }
 
 const DIALOG_HEIGHT = 600;
 
-export default function MediaP(props: IProps) {
-  const { themes: initThemes, searchTerm } = props;
+export default function MediaP(props: MediaPProps) {
+  const { themes: initThemes, searchTerm, stores, activeSetttingsTab } = props;
+
+  const { selectedTheme } = stores.themes;
+
+  const showingInstalledThemes = activeSetttingsTab === 'installed';
 
   if (!initThemes || initThemes.length === 0) {
     return null;
@@ -63,12 +71,21 @@ export default function MediaP(props: IProps) {
 
   const currentThemes = themes.slice(start, end);
 
-  const [selectedTheme, setSelectedTheme] = useState<ITheme | null>(null);
+  const [themeForDialog, setThemeForDialog] = useState<ITheme | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
 
   const handleInfoClick = (theme: ITheme) => {
-    setSelectedTheme(theme);
+    setThemeForDialog(theme);
     setDialogOpen(true);
+  };
+
+  const handleThemeClick = (theme: ITheme | null) => {
+    if (!showingInstalledThemes && theme) {
+      handleInfoClick(theme);
+      return;
+    }
+
+    stores.themes.changeSelectedTheme(theme);
   };
 
   const handleCloseDialog = () => {
@@ -93,15 +110,34 @@ export default function MediaP(props: IProps) {
           justifyContent: 'center',
         }}
       >
+        {showingInstalledThemes && page === 1 && (
+          <Card
+            key="default"
+            className={`card ${selectedTheme === null ? 'selected' : ''}`}
+          >
+            <div
+              onClick={() => handleThemeClick(null)}
+              onKeyDown={() => handleThemeClick(null)}
+              role="button"
+              tabIndex={0}
+            >
+              <CardHeader
+                title="Default Theme"
+                // subheader={theme.version}
+                sx={{ height: 'min-content' }}
+              />
+            </div>
+          </Card>
+        )}
         {currentThemes.map(theme => {
           return (
             <Card
               key={theme.id}
-              className={`card ${theme.id === 6 ? 'selected' : ''}`}
+              className={`card ${theme.id === selectedTheme?.id ? 'selected' : ''}`}
             >
               <div
-                onClick={() => handleInfoClick(theme)}
-                onKeyDown={() => handleInfoClick(theme)}
+                onClick={() => handleThemeClick(theme)}
+                onKeyDown={() => handleThemeClick(theme)}
                 role="button"
                 tabIndex={0}
               >
@@ -154,7 +190,7 @@ export default function MediaP(props: IProps) {
               alignItems: 'center',
             }}
           >
-            {selectedTheme?.name}
+            {themeForDialog?.name}
             <div>
               <IconButton aria-label="install">
                 <InstallDesktopIcon />
@@ -170,11 +206,11 @@ export default function MediaP(props: IProps) {
           <CardMedia
             component="img"
             height="300"
-            src={selectedTheme?.preview ?? 'https://via.placeholder.com/150'}
-            alt={selectedTheme?.name}
+            src={themeForDialog?.preview ?? 'https://via.placeholder.com/150'}
+            alt={themeForDialog?.name}
           />
-          <p>Version: {selectedTheme?.version}</p>
-          <p>{selectedTheme?.description}</p>
+          <p>Version: {themeForDialog?.version}</p>
+          <p>{themeForDialog?.description}</p>
         </DialogContent>
       </Dialog>
     </>
