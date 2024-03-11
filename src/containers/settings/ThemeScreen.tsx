@@ -6,9 +6,9 @@ import ErrorBoundary from '../../components/util/ErrorBoundary';
 
 import { H1, H5 } from '../../components/ui/headline';
 import Input from '../../components/ui/input';
-import MediaP from '../../components/settings/themes/MediaP';
+import ThemeSelector from '../../components/settings/themes/ThemeSelector';
 
-const debug = require('../../preload-safe-debug')('Ferdium:ThemeScreen');
+// const debug = require('../../preload-safe-debug')('Ferdium:ThemeScreen');
 
 const messages = defineMessages({
   themesHeader: {
@@ -119,7 +119,7 @@ class ThemeScreen extends Component<ThemeScreenProps, ThemeScreenState> {
 
             {/* Installed */}
             {this.state.activeSetttingsTab === 'installed' && (
-              <MediaP
+              <ThemeSelector
                 {...this.props}
                 themes={installedThemes}
                 searchTerm={this.state.search}
@@ -129,7 +129,7 @@ class ThemeScreen extends Component<ThemeScreenProps, ThemeScreenState> {
 
             {/* Not installed */}
             {this.state.activeSetttingsTab === 'not-installed' && (
-              <MediaP
+              <ThemeSelector
                 {...this.props}
                 themes={notInstalledThemes}
                 searchTerm={this.state.search}
@@ -139,7 +139,7 @@ class ThemeScreen extends Component<ThemeScreenProps, ThemeScreenState> {
 
             {/* Updates */}
             {/* {this.state.activeSetttingsTab === 'updates' && (
-              <MediaP
+              <ThemeSelector
                 themes={notInstalledThemes}
                 searchTerm={this.state.search}
               />

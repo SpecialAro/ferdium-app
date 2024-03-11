@@ -24,11 +24,11 @@ interface MediaPProps extends StoresProps, WrappedComponentProps {
   activeSetttingsTab: string;
 }
 
-const debug = require('../../../preload-safe-debug')('Ferdium:MediaP');
+const debug = require('../../../preload-safe-debug')('Ferdium:ThemeSelector');
 
 const DIALOG_HEIGHT = 600;
 
-function MediaP(props: MediaPProps) {
+function ThemeSelector(props: MediaPProps) {
   const { themes: initThemes, searchTerm, stores, activeSetttingsTab } = props;
 
   const { selectedTheme } = stores.themes;
@@ -243,4 +243,4 @@ function MediaP(props: MediaPProps) {
   );
 }
 
-export default observer(MediaP);
+export default observer(ThemeSelector);
