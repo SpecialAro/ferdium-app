@@ -8,4 +8,8 @@ export default class ThemesApi {
   themes() {
     return this.server.getThemes();
   }
+
+  downloadTheme(themeId: string) {
+    return this.server.downloadTheme(themeId);
+  }
 }

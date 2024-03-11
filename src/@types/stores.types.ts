@@ -255,6 +255,7 @@ interface ThemesStore extends TypedStore {
   installedThemes: ITheme[];
   notInstalledThemes: ITheme[];
   requestThemesRequest: CachedRequest;
+  downloadTheme: () => void;
   _loadThemes: () => void;
   loadLocalThemes: () => void;
   changeSelectedTheme: (theme: ITheme) => void;

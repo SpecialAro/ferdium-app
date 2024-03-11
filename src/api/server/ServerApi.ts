@@ -22,7 +22,7 @@ import UserModel from '../../models/User';
 import sleep from '../../helpers/async-helpers';
 
 import { SERVER_NOT_LOADED } from '../../config';
-import { userDataRecipesPath } from '../../environment-remote';
+import { userDataPath, userDataRecipesPath } from '../../environment-remote';
 import { asarRecipesPath } from '../../helpers/asar-helpers';
 import apiBase from '../apiBase';
 import {
@@ -357,6 +357,65 @@ export default class ServerApi {
     debug('ServerApi::getThemes resolves', data);
 
     return data;
+  }
+
+  async downloadTheme(themeId: string): Promise<void> {
+    if (apiBase() === SERVER_NOT_LOADED) {
+      throw new Error('Server not loaded');
+    }
+    const themesDirectory = userDataPath('config', 'themes');
+    const themesTempBase = userDataPath('config', 'themes-temp');
+    const themesTempDirectory = join(themesTempBase, themeId);
+    const tempArchivePath = join(themesTempDirectory, 'theme.tar.gz');
+
+    const internalRecipeFile = asarRecipesPath(`${themeId}.tar.gz`);
+
+    ensureDirSync(themesTempDirectory);
+
+    let archivePath: PathOrFileDescriptor;
+
+    if (pathExistsSync(internalRecipeFile)) {
+      debug('[ServerApi::downloadTheme] Using internal recipe file');
+      archivePath = internalRecipeFile;
+    } else {
+      debug('[ServerApi::downloadTheme] Downloading recipe from server');
+      archivePath = tempArchivePath;
+
+      const packageUrl = `${apiBase()}/themes/download/${themeId}`;
+
+      const res = await window.fetch(packageUrl);
+      debug('Theme downloaded', themeId);
+      const blob = await res.blob();
+      const buffer = await blob.arrayBuffer();
+      writeFileSync(tempArchivePath, Buffer.from(buffer));
+    }
+    debug(archivePath);
+
+    await sleep(10);
+
+    // @ts-expect-error No overload matches this call.
+    await tar.x({
+      file: archivePath,
+      cwd: themesTempDirectory,
+      preservePaths: true,
+      unlink: true,
+      preserveOwner: false,
+      onwarn: x => debug('warn', themeId, x),
+    });
+
+    await sleep(10);
+
+    const { id } = readJsonSync(join(themesTempDirectory, 'theme.json'));
+    const recipeDirectory = join(themesDirectory, id);
+    copySync(themesTempDirectory, recipeDirectory);
+    removeSync(themesTempDirectory);
+    removeSync(join(themesTempDirectory, themeId, 'theme.tar.gz'));
+
+    // Check if directory is empty and remove it
+    // const files = readdirSync(themesTempDirectory);
+    // if (files.length === 0) {
+    //   removeSync(themesTempDirectory);
+    // }
   }
 
   async getFeatures() {

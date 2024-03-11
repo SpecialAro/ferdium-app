@@ -9,7 +9,7 @@ import { Actions } from '../actions/lib/actions';
 import TypedStore from './lib/TypedStore';
 import { ITheme } from '../models/Theme';
 import { userDataPath } from '../environment-remote';
-import { downloadThemeFromGit } from '../helpers/themes-helpers';
+import Request from './lib/Request';
 import CachedRequest from './lib/CachedRequest';
 
 const debug = require('../preload-safe-debug')('Ferdium:ThemesStore');
@@ -28,6 +28,11 @@ export default class ThemesStore extends TypedStore {
   @observable requestThemesRequest: CachedRequest = new CachedRequest(
     this.api.themes,
     'themes',
+  );
+
+  @observable downloadThemeRequest: Request = new Request(
+    this.api.themes,
+    'downloadTheme',
   );
 
   @computed get notInstalledThemes(): ITheme[] {
@@ -55,18 +60,21 @@ export default class ThemesStore extends TypedStore {
 
   @action async installTheme(theme: ITheme): Promise<void> {
     this.isInstalling = true;
-    const themePath = userDataPath('config', 'themes', theme.id);
 
-    try {
-      const GITHUB_BASE_PATH = `themes/${theme.id}`;
-      await ensureDir(themePath);
+    await this.downloadThemeRequest.execute(theme.id).promise;
 
-      // Fetch the data from URL
-      await downloadThemeFromGit(GITHUB_BASE_PATH);
-    } catch (error) {
-      await rmdir(themePath);
-      debug('Error installing theme', error);
-    }
+    // const themePath = userDataPath('config', 'themes', theme.id);
+
+    // try {
+    //   const GITHUB_BASE_PATH = `themes/${theme.id}`;
+    //   await ensureDir(themePath);
+
+    //   // Fetch the data from URL
+    //   await downloadThemeFromGit(GITHUB_BASE_PATH);
+    // } catch (error) {
+    //   await rmdir(themePath);
+    //   debug('Error installing theme', error);
+    // }
 
     await this.loadLocalThemes();
     this.isInstalling = false;
