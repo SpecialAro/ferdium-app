@@ -1,47 +1,16 @@
-import { ipcRenderer } from 'electron';
 import { Component, ReactElement } from 'react';
 import { inject, observer } from 'mobx-react';
 import { defineMessages, injectIntl, WrappedComponentProps } from 'react-intl';
 import Slider from 'react-slick';
 import { readJSONSync } from 'fs-extra';
-import { FormFields } from '../../@types/mobx-form.types';
 import { StoresProps } from '../../@types/ferdium-components.types';
-import Form from '../../lib/Form';
-import { APP_LOCALES, SPELLCHECKER_LOCALES } from '../../i18n/languages';
-import {
-  DEFAULT_APP_SETTINGS,
-  HIBERNATION_STRATEGIES,
-  SIDEBAR_WIDTH,
-  SIDEBAR_SERVICES_LOCATION,
-  ICON_SIZES,
-  NAVIGATION_BAR_BEHAVIOURS,
-  SEARCH_ENGINE_NAMES,
-  TRANSLATOR_ENGINE_NAMES,
-  GOOGLE_TRANSLATOR_LANGUAGES,
-  TRANSLATOR_ENGINE_GOOGLE,
-  LIBRETRANSLATE_TRANSLATOR_LANGUAGES,
-  TODO_APPS,
-  WAKE_UP_STRATEGIES,
-  WAKE_UP_HIBERNATION_STRATEGIES,
-  SPLIT_COLUMNS_MIN,
-  SPLIT_COLUMNS_MAX,
-  WEBRTC_IP_HANDLING_POLICY,
-} from '../../config';
-import { isMac } from '../../environment';
-
-import { getSelectOptions } from '../../helpers/i18n-helpers';
-import { hash } from '../../helpers/password-helpers';
-import defaultUserAgent from '../../helpers/userAgent-helpers';
-
-import EditSettingsForm from '../../components/settings/settings/EditSettingsForm';
 import ErrorBoundary from '../../components/util/ErrorBoundary';
 
-import globalMessages from '../../i18n/globalMessages';
-import { importExportURL } from '../../api/apiBase';
-import { ifUndefined } from '../../jsUtils';
-import { H1, H2 } from '../../components/ui/headline';
+import { H1, H2, H5 } from '../../components/ui/headline';
 import { userDataPath } from '../../environment-remote';
 import Input from '../../components/ui/input';
+import MediaP from '../../components/settings/themes/MediaP';
+import { ITheme } from '../../models/Theme';
 
 const debug = require('../../preload-safe-debug')('Ferdium:ThemeScreen');
 
@@ -58,12 +27,21 @@ const messages = defineMessages({
     id: 'settings.theme.notInstalledSection',
     defaultMessage: 'Not installed',
   },
+  headlineInstalled: {
+    id: 'settings.theme.headlineInstalled',
+    defaultMessage: 'Installed',
+  },
+  headlineNotInstalled: {
+    id: 'settings.theme.headlineNotInstalled',
+    defaultMessage: 'Not installed',
+  },
 });
 
 interface ThemeScreenProps extends StoresProps, WrappedComponentProps {}
 
 interface ThemeScreenState {
   search: string;
+  activeSetttingsTab: string;
 }
 
 @inject('stores', 'actions')
@@ -74,7 +52,14 @@ class ThemeScreen extends Component<ThemeScreenProps, ThemeScreenState> {
 
     this.state = {
       search: '',
+      activeSetttingsTab: 'installed',
     };
+  }
+
+  setActiveSettingsTab(tab) {
+    this.setState({
+      activeSetttingsTab: tab,
+    });
   }
 
   render(): ReactElement {
@@ -82,26 +67,12 @@ class ThemeScreen extends Component<ThemeScreenProps, ThemeScreenState> {
 
     const installedThemesPath = userDataPath('config', 'themes', 'themes.json');
 
-    let installedThemes: ITheme[] = readJSONSync(installedThemesPath);
+    const installedThemes: ITheme[] = readJSONSync(installedThemesPath);
 
-    let notInstalledThemes = theme.filter(
+    const notInstalledThemes = theme.filter(
       theme =>
         !installedThemes.some(installedTheme => installedTheme.id === theme.id),
     );
-
-    const search = this.state.search.toLowerCase();
-
-    if (search) {
-      installedThemes = installedThemes.filter(theme =>
-        theme.name.toLowerCase().includes(search),
-      );
-      notInstalledThemes = notInstalledThemes.filter(theme =>
-        theme.name.toLowerCase().includes(search),
-      );
-    } else {
-      installedThemes = installedThemes.filter(Boolean);
-      notInstalledThemes = notInstalledThemes.filter(Boolean);
-    }
 
     return (
       <ErrorBoundary>
@@ -110,63 +81,71 @@ class ThemeScreen extends Component<ThemeScreenProps, ThemeScreenState> {
             <H1>{intl.formatMessage(messages.themesHeader)}</H1>
           </div>
           <div className="settings__body">
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                width: '100%',
-                height: '100%',
-              }}
-            >
-              <Input
-                placeholder="Search"
-                onChange={e => {
-                  this.setState({ search: e.target.value });
+            {/* Titles */}
+            <div className="recipes__navigation">
+              <H5
+                id="installed"
+                className={
+                  this.state.activeSetttingsTab === 'installed'
+                    ? 'badge badge--primary'
+                    : 'badge'
+                }
+                onClick={() => {
+                  this.setActiveSettingsTab('installed');
                 }}
-              />
-              <H2>{intl.formatMessage(messages.installedSection)}</H2>
-              <div>
-                <p>Installed themes will be listed here</p>
-                <div style={{ display: 'block', width: '90%', height: 200 }}>
-                  {installedThemes.length > 0 ? (
-                    <Slider {...simpleSlideSettings}>
-                      {installedThemes.map(theme => {
-                        return (
-                          <div key={theme.id}>
-                            <h3>{theme.name}</h3>
-                            <p>{theme.description}</p>
-                            <img src={theme.preview} alt={theme.name} />
-                          </div>
-                        );
-                      })}
-                    </Slider>
-                  ) : (
-                    <p>No installed themes found.</p>
-                  )}
-                </div>
-              </div>
-              <H2>{intl.formatMessage(messages.notInstalledSection)}</H2>
-              <div>
-                <p> Not installed themes will be listed here</p>
-                <div style={{ display: 'block', width: '90%', height: 200 }}>
-                  {installedThemes.length > 0 ? (
-                    <Slider {...simpleSlideSettings}>
-                      {notInstalledThemes.map(theme => {
-                        return (
-                          <div key={theme.id}>
-                            <h3>{theme.name}</h3>
-                            <p>{theme.description}</p>
-                            <img src={theme.preview} alt={theme.name} />
-                          </div>
-                        );
-                      })}
-                    </Slider>
-                  ) : (
-                    <p>No found.</p>
-                  )}
-                </div>
+              >
+                {intl.formatMessage(messages.headlineInstalled)}
+              </H5>
+              <H5
+                id="not-installed"
+                className={
+                  this.state.activeSetttingsTab === 'not-installed'
+                    ? 'badge badge--primary'
+                    : 'badge'
+                }
+                onClick={() => {
+                  this.setActiveSettingsTab('not-installed');
+                }}
+              >
+                {intl.formatMessage(messages.headlineNotInstalled)}
+              </H5>
+              <div
+                style={{
+                  height: 'min-content',
+                  position: 'relative',
+                }}
+              >
+                <Input
+                  placeholder="Search"
+                  onChange={e => {
+                    this.setState({ search: e.target.value });
+                  }}
+                />
               </div>
             </div>
+
+            {/* Themes */}
+
+            {/* Installed */}
+            {this.state.activeSetttingsTab === 'installed' && (
+              <MediaP themes={installedThemes} searchTerm={this.state.search} />
+            )}
+
+            {/* Not installed */}
+            {this.state.activeSetttingsTab === 'not-installed' && (
+              <MediaP
+                themes={notInstalledThemes}
+                searchTerm={this.state.search}
+              />
+            )}
+
+            {/* Updates */}
+            {/* {this.state.activeSetttingsTab === 'updates' && (
+              <MediaP
+                themes={notInstalledThemes}
+                searchTerm={this.state.search}
+              />
+            )} */}
           </div>
         </div>
       </ErrorBoundary>
@@ -175,15 +154,6 @@ class ThemeScreen extends Component<ThemeScreenProps, ThemeScreenState> {
 }
 
 export default injectIntl(ThemeScreen);
-
-interface ITheme {
-  id: string;
-  name: string;
-  description: string;
-  author?: string;
-  version?: string;
-  preview?: string;
-}
 
 const simpleSlideSettings = {
   dots: false,
