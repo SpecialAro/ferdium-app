@@ -14,6 +14,7 @@ import InstallDesktopIcon from '@mui/icons-material/InstallDesktop';
 import InfoIcon from '@mui/icons-material/Info';
 import DeleteForeverOutlinedIcon from '@mui/icons-material/DeleteForeverOutlined';
 import { WrappedComponentProps } from 'react-intl';
+import { observer } from 'mobx-react';
 import { ITheme } from '../../../models/Theme';
 import { StoresProps } from '../../../@types/ferdium-components.types';
 
@@ -27,7 +28,7 @@ const debug = require('../../../preload-safe-debug')('Ferdium:MediaP');
 
 const DIALOG_HEIGHT = 600;
 
-export default function MediaP(props: MediaPProps) {
+function MediaP(props: MediaPProps) {
   const { themes: initThemes, searchTerm, stores, activeSetttingsTab } = props;
 
   const { selectedTheme } = stores.themes;
@@ -88,6 +89,10 @@ export default function MediaP(props: MediaPProps) {
   const handleInstallClick = (theme: ITheme) => {
     debug('Install theme:', showingInstalledThemes);
     if (showingInstalledThemes) {
+      if (selectedTheme?.id === theme.id) {
+        stores.themes.changeSelectedTheme(null);
+      }
+
       stores.themes.uninstallTheme(theme);
       return;
     }
@@ -97,13 +102,15 @@ export default function MediaP(props: MediaPProps) {
 
   return (
     <>
-      <Pagination
-        count={pageCount}
-        page={page}
-        onChange={handlePageChange}
-        color="primary"
-        className="pagination"
-      />
+      {pageCount !== 0 && (
+        <Pagination
+          count={pageCount}
+          page={page}
+          onChange={handlePageChange}
+          color="primary"
+          className="pagination"
+        />
+      )}
       <div
         style={{
           display: 'flex',
@@ -161,7 +168,11 @@ export default function MediaP(props: MediaPProps) {
                   aria-label="install"
                   onClick={() => handleInstallClick(theme)}
                 >
-                  <InstallDesktopIcon />
+                  {showingInstalledThemes ? (
+                    <DeleteForeverOutlinedIcon />
+                  ) : (
+                    <InstallDesktopIcon />
+                  )}
                 </IconButton>
                 <IconButton
                   aria-label="info"
@@ -199,15 +210,19 @@ export default function MediaP(props: MediaPProps) {
             {themeForDialog?.name}
             <div>
               <IconButton
-                aria-label="install"
+                aria-label="install/uninstall"
                 onClick={() => {
-                  if (themeForDialog) handleInstallClick(themeForDialog);
+                  if (themeForDialog) {
+                    handleInstallClick(themeForDialog);
+                    handleCloseDialog();
+                  }
                 }}
               >
-                <InstallDesktopIcon />
-              </IconButton>
-              <IconButton aria-label="uninstall">
-                <DeleteForeverOutlinedIcon />
+                {showingInstalledThemes ? (
+                  <DeleteForeverOutlinedIcon />
+                ) : (
+                  <InstallDesktopIcon />
+                )}
               </IconButton>
             </div>
           </div>
@@ -227,3 +242,5 @@ export default function MediaP(props: MediaPProps) {
     </>
   );
 }
+
+export default observer(MediaP);
