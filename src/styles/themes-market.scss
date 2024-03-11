@@ -1,0 +1,53 @@
+@import './config.scss';
+
+.theme__dark .card {
+  background: $dark-theme-gray-dark;
+  color: $dark-theme-text-color;
+
+  .MuiCardHeader-subheader {
+    color: $dark-theme-text-color;
+  }
+
+  .MuiIconButton-root {
+    color: $dark-theme-text-color !important;
+  }
+}
+
+.selected {
+  border: 5px outset $theme-brand-primary !important;
+}
+
+.card {
+  margin: 1rem;
+  display: block;
+  flex-direction: column;
+  justify-content: space-between;
+  border: 5px solid transparent;
+}
+
+.theme__dark .dialog {
+  .MuiDialog-paper {
+    background: $dark-theme-gray-dark;
+    color: $dark-theme-text-color;
+  }
+
+  .MuiIconButton-root {
+    color: $dark-theme-text-color !important;
+  }
+}
+
+.pagination {
+  & > .MuiPagination-ul {
+    justify-content: center;
+  }
+
+  .Mui-selected {
+    background-color: $theme-brand-primary !important;
+  }
+}
+
+.theme__dark .pagination {
+  .MuiPaginationItem-root {
+    color: $dark-theme-text-color !important;
+  }
+}
