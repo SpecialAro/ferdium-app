@@ -50,6 +50,8 @@ class ThemeScreen extends Component<ThemeScreenProps, ThemeScreenState> {
       search: '',
       activeSetttingsTab: 'installed',
     };
+
+    this.props.stores.themes.setup();
   }
 
   setActiveSettingsTab(tab) {

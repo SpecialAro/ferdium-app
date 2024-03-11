@@ -64,6 +64,7 @@ interface Actions {
 interface Api {
   app: AppStore;
   features: FeaturesStore;
+  themes: ThemesStore;
   // eslint-disable-next-line @typescript-eslint/ban-types
   local: {};
   recipePreviews: RecipePreviewsStore;
@@ -253,6 +254,7 @@ interface ThemesStore extends TypedStore {
   availableThemes: ITheme[];
   installedThemes: ITheme[];
   notInstalledThemes: ITheme[];
+  requestThemesRequest: CachedRequest;
   _loadThemes: () => void;
   loadLocalThemes: () => void;
   changeSelectedTheme: (theme: ITheme) => void;

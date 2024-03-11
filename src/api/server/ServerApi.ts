@@ -38,6 +38,7 @@ import {
 } from '../../helpers/recipe-helpers';
 
 import { removeServicePartitionDirectory } from '../../helpers/service-helpers';
+import { ITheme } from '../../models/Theme';
 
 const debug = require('../../preload-safe-debug')('Ferdium:ServerApi');
 
@@ -340,6 +341,22 @@ export default class ServerApi {
     const features = data;
     debug('ServerApi::getDefaultFeatures resolves', features);
     return features;
+  }
+
+  async getThemes(): Promise<ITheme[]> {
+    if (apiBase() === SERVER_NOT_LOADED) {
+      throw new Error('Server not loaded');
+    }
+
+    const request = await sendAuthRequest(`${apiBase()}/themes`);
+    if (!request.ok) {
+      throw new Error(request.statusText);
+    }
+    const data = await request.json();
+
+    debug('ServerApi::getThemes resolves', data);
+
+    return data;
   }
 
   async getFeatures() {

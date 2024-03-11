@@ -1,15 +1,11 @@
 import { useEffect, useState } from 'react';
 import {
-  Button,
   Card,
   CardActions,
   CardHeader,
   CardMedia,
-  CssBaseline,
   Dialog,
-  DialogActions,
   DialogContent,
-  DialogProps,
   DialogTitle,
   IconButton,
   Pagination,
@@ -20,13 +16,14 @@ import DeleteForeverOutlinedIcon from '@mui/icons-material/DeleteForeverOutlined
 import { WrappedComponentProps } from 'react-intl';
 import { ITheme } from '../../../models/Theme';
 import { StoresProps } from '../../../@types/ferdium-components.types';
-import { theme } from '../../../themes';
 
 interface MediaPProps extends StoresProps, WrappedComponentProps {
   themes: ITheme[];
   searchTerm: string;
   activeSetttingsTab: string;
 }
+
+const debug = require('../../../preload-safe-debug')('Ferdium:MediaP');
 
 const DIALOG_HEIGHT = 600;
 
@@ -36,10 +33,6 @@ export default function MediaP(props: MediaPProps) {
   const { selectedTheme } = stores.themes;
 
   const showingInstalledThemes = activeSetttingsTab === 'installed';
-
-  if (!initThemes || initThemes.length === 0) {
-    return null;
-  }
 
   let themes = initThemes;
 
@@ -90,6 +83,16 @@ export default function MediaP(props: MediaPProps) {
 
   const handleCloseDialog = () => {
     setDialogOpen(false);
+  };
+
+  const handleInstallClick = (theme: ITheme) => {
+    debug('Install theme:', showingInstalledThemes);
+    if (showingInstalledThemes) {
+      stores.themes.uninstallTheme(theme);
+      return;
+    }
+
+    stores.themes.installTheme(theme);
   };
 
   return (
@@ -154,7 +157,10 @@ export default function MediaP(props: MediaPProps) {
                 />
               </div>
               <CardActions sx={{ justifyContent: 'center' }}>
-                <IconButton aria-label="install">
+                <IconButton
+                  aria-label="install"
+                  onClick={() => handleInstallClick(theme)}
+                >
                   <InstallDesktopIcon />
                 </IconButton>
                 <IconButton
@@ -192,7 +198,12 @@ export default function MediaP(props: MediaPProps) {
           >
             {themeForDialog?.name}
             <div>
-              <IconButton aria-label="install">
+              <IconButton
+                aria-label="install"
+                onClick={() => {
+                  if (themeForDialog) handleInstallClick(themeForDialog);
+                }}
+              >
                 <InstallDesktopIcon />
               </IconButton>
               <IconButton aria-label="uninstall">

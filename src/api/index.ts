@@ -5,6 +5,7 @@ import RecipesApi from './RecipesApi';
 import UserApi from './UserApi';
 import LocalApi from './LocalApi';
 import FeaturesApi from './FeaturesApi';
+import ThemesApi from './ThemesApi';
 
 export interface ApiInterface {
   app: AppApi;
@@ -12,6 +13,7 @@ export interface ApiInterface {
   recipePreviews: RecipePreviewsApi;
   recipes: RecipesApi;
   features: FeaturesApi;
+  themes: ThemesApi;
   user: UserApi;
   local: LocalApi;
 }
@@ -22,6 +24,7 @@ export default (server: any, local: any): ApiInterface => ({
   recipePreviews: new RecipePreviewsApi(server),
   recipes: new RecipesApi(server),
   features: new FeaturesApi(server),
+  themes: new ThemesApi(server),
   user: new UserApi(server, local),
   local: new LocalApi(server, local),
 });
