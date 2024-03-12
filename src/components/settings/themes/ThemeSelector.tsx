@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { ReactElement, useEffect, useState } from 'react';
 import {
   Box,
   Card,
@@ -11,6 +11,7 @@ import {
   IconButton,
   Pagination,
 } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
 import InstallDesktopIcon from '@mui/icons-material/InstallDesktop';
 import InfoIcon from '@mui/icons-material/Info';
 import DeleteForeverOutlinedIcon from '@mui/icons-material/DeleteForeverOutlined';
@@ -19,6 +20,7 @@ import { WrappedComponentProps, defineMessages, injectIntl } from 'react-intl';
 import { observer } from 'mobx-react';
 import { ITheme } from '../../../models/Theme';
 import { StoresProps } from '../../../@types/ferdium-components.types';
+import { H1 } from '../../ui/headline';
 
 interface MediaPProps extends StoresProps, WrappedComponentProps {
   themes: ITheme[];
@@ -119,6 +121,37 @@ function ThemeSelector(props: MediaPProps) {
     stores.themes.updateTheme(theme);
   };
 
+  const parseInfo = (theme: ITheme | null) => {
+    if (!theme) return null;
+    const keys = Object.keys(theme);
+
+    // Keys to display (order matters)
+    const themeKeys = ['version', 'author'];
+
+    const filteredKeys = keys.filter(key => themeKeys.includes(key));
+
+    // Order filterKeys in the same order as themeKeys
+    filteredKeys.sort((a, b) => {
+      return themeKeys.indexOf(a) - themeKeys.indexOf(b);
+    });
+
+    const element: ReactElement[] = [];
+    for (const [index, key] of filteredKeys.entries()) {
+      if (theme[key] !== '' && theme[key] !== null) {
+        // if the last element, don't add a comma
+
+        element.push(theme[key]);
+        if (index !== filteredKeys.length - 1) {
+          element.push(<span key={index}>|</span>);
+        }
+      }
+    }
+
+    return element.map(el => {
+      return el;
+    });
+  };
+
   return (
     <Box
       sx={{
@@ -195,7 +228,11 @@ function ThemeSelector(props: MediaPProps) {
               >
                 <CardHeader
                   title={theme.name}
-                  subheader={`${theme.version}${updateTheme ? ` -> ${newVersion?.version}` : ''}`}
+                  subheader={
+                    theme.version
+                      ? `${theme.version}${updateTheme ? ` -> ${newVersion?.version}` : ''}`
+                      : null
+                  }
                   sx={{ height: 'min-content' }}
                 />
                 <CardMedia
@@ -211,7 +248,7 @@ function ThemeSelector(props: MediaPProps) {
                     aria-label="update"
                     onClick={() => handleUpdateClick(theme)}
                   >
-                    <UpgradeIcon />
+                    <UpgradeIcon color="success" />
                   </IconButton>
                 )}
                 <IconButton
@@ -219,16 +256,16 @@ function ThemeSelector(props: MediaPProps) {
                   onClick={() => handleInstallClick(theme)}
                 >
                   {showingInstalledThemes ? (
-                    <DeleteForeverOutlinedIcon />
+                    <DeleteForeverOutlinedIcon color="error" />
                   ) : (
-                    <InstallDesktopIcon />
+                    <InstallDesktopIcon color="success" />
                   )}
                 </IconButton>
                 <IconButton
                   aria-label="info"
                   onClick={() => handleInfoClick(theme)}
                 >
-                  <InfoIcon />
+                  <InfoIcon color="info" />
                 </IconButton>
               </CardActions>
             </Card>
@@ -257,7 +294,14 @@ function ThemeSelector(props: MediaPProps) {
               alignItems: 'center',
             }}
           >
-            {themeForDialog?.name}
+            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+              <H1>{themeForDialog?.name}</H1>
+              <Box
+                sx={{ display: 'flex', flexDirection: 'row', gap: '0.6rem' }}
+              >
+                {parseInfo(themeForDialog)}
+              </Box>
+            </Box>
             <div>
               <IconButton
                 aria-label="install/uninstall"
@@ -269,24 +313,45 @@ function ThemeSelector(props: MediaPProps) {
                 }}
               >
                 {showingInstalledThemes ? (
-                  <DeleteForeverOutlinedIcon />
+                  <DeleteForeverOutlinedIcon color="error" />
                 ) : (
-                  <InstallDesktopIcon />
+                  <InstallDesktopIcon color="success" />
                 )}
+              </IconButton>
+              <IconButton
+                aria-label="close"
+                onClick={() => {
+                  handleCloseDialog();
+                }}
+              >
+                <CloseIcon />
               </IconButton>
             </div>
           </div>
         </DialogTitle>
         <DialogContent>
-          {/* Display specific data for the selected theme here */}
-          <CardMedia
-            component="img"
-            height="300"
-            src={themeForDialog?.preview ?? 'https://via.placeholder.com/150'}
-            alt={themeForDialog?.name}
-          />
-          <p>Version: {themeForDialog?.version}</p>
-          <p>{themeForDialog?.description}</p>
+          {themeForDialog?.preview && (
+            <CardMedia
+              component="img"
+              height="300"
+              src={themeForDialog?.preview ?? 'https://via.placeholder.com/150'}
+              alt={themeForDialog?.name}
+            />
+          )}
+          <Box
+            sx={{
+              marginTop: '1.5rem',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '1rem',
+              height: 'fit-content',
+              textAlign: 'justify',
+            }}
+          >
+            {themeForDialog?.description && (
+              <p>{themeForDialog?.description}</p>
+            )}
+          </Box>
         </DialogContent>
       </Dialog>
     </Box>
