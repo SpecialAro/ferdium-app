@@ -120,7 +120,14 @@ function ThemeSelector(props: MediaPProps) {
   };
 
   return (
-    <>
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '1rem',
+        height: 'min-content',
+      }}
+    >
       {pageCount !== 0 && (
         <Pagination
           count={pageCount}
@@ -282,7 +289,7 @@ function ThemeSelector(props: MediaPProps) {
           <p>{themeForDialog?.description}</p>
         </DialogContent>
       </Dialog>
-    </>
+    </Box>
   );
 }
 
