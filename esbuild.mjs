@@ -42,6 +42,18 @@ const staticAssets = () => [
   }),
   copy({
     assets: {
+      from: ['./themes/archives/*.tar.gz'],
+      to: ['./ferdium-themes'],
+    },
+  }),
+  copy({
+    assets: {
+      from: ['./themes/*.json'],
+      to: ['./ferdium-themes'],
+    },
+  }),
+  copy({
+    assets: {
       from: ['./src/**/*.json'],
       to: ['./'],
     },

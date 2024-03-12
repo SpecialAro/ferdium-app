@@ -382,8 +382,10 @@ export default class ServerApi {
       archivePath = tempArchivePath;
 
       const packageUrl = `${apiBase()}/themes/download/${themeId}`;
-
-      const res = await window.fetch(packageUrl);
+      const res = await sendAuthRequest(packageUrl);
+      if (!res.ok) {
+        throw new Error(res.statusText);
+      }
       debug('Theme downloaded', themeId);
       const blob = await res.blob();
       const buffer = await blob.arrayBuffer();

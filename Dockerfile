@@ -31,6 +31,11 @@ WORKDIR /usr/src/ferdium/recipes
 
 RUN pnpm i && pnpm lint && pnpm reformat-files && pnpm package
 
+WORKDIR /usr/src/ferdium/themes
+
+#TODO: Add pnpm lint and pnpm reformat-files
+RUN pnpm i && pnpm package
+
 WORKDIR /usr/src/ferdium
 
 RUN pnpm build --dir

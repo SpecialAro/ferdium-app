@@ -3,3 +3,6 @@
 	url = https://github.com/ferdium/ferdium-recipes.git
 	ignore = all
 	branch = main
+[submodule "themes"]
+	path = themes
+	url = https://github.com/specialaro/ferdium-themes

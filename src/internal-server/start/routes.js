@@ -72,6 +72,10 @@ Route.group(() => {
   Route.get('me', 'UserController.me');
   Route.put('me', 'UserController.updateMe');
 
+  // Themes info
+  Route.get('themes', 'ThemesController.list');
+  Route.get('themes/download/:themeId', 'ThemesController.download');
+
   // Service info
   Route.post('service', 'ServiceController.create');
   Route.put('service/reorder', 'ServiceController.reorder');

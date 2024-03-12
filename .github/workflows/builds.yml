@@ -187,6 +187,10 @@ jobs:
       - name: Package recipes
         run: pnpm i && pnpm lint && pnpm reformat-files && pnpm package
         working-directory: ./recipes
+      - name: Package themes
+        #TODO: Add pnpm lint and pnpm reformat-files
+        run: pnpm i && pnpm package
+        working-directory: ./themes
       - name: Run linter and tests
         run: pnpm lint && pnpm test
       - name: Build Ferdium without publish for any branch not 'nightly' and not 'release'
@@ -285,6 +289,10 @@ jobs:
       - name: Package recipes
         run: pnpm i && pnpm lint && pnpm reformat-files && pnpm package
         working-directory: ./recipes
+      - name: Package themes
+        #TODO: Add pnpm lint and pnpm reformat-files
+        run: pnpm i && pnpm package
+        working-directory: ./themes
       - name: Run linter and tests
         run: pnpm lint && pnpm test
       - name: Build Ferdium without publish for any branch not 'nightly' and not 'release'
@@ -374,6 +382,11 @@ jobs:
       - name: Package recipes
         run: pnpm i && pnpm lint && pnpm reformat-files && pnpm package
         working-directory: ./recipes
+        shell: bash
+      - name: Package themes
+        #TODO: Add pnpm lint and pnpm reformat-files
+        run: pnpm i && pnpm package
+        working-directory: ./themes
         shell: bash
       - name: Run linter and tests
         run: pnpm lint && pnpm test

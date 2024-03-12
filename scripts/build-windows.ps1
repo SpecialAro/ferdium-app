@@ -151,6 +151,12 @@ Push-Location recipes
 pnpm i && pnpm lint && pnpm reformat-files && pnpm package
 Pop-Location
 
+Write-Host "*************** Building themes ***************"
+Push-Location themes
+# TODO: Add pnpm lint and pnpm reformat-files
+pnpm i && pnpm package
+Pop-Location
+
 # -----------------------------------------------------------------------------
 # Now the meat.....
 & pnpm i

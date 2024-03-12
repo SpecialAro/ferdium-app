@@ -108,6 +108,12 @@ pushd recipes
 pnpm i && pnpm lint && pnpm reformat-files && pnpm package
 popd
 
+printf "\n*************** Building themes ***************\n"
+pushd themes
+# TODO: Add pnpm lint and pnpm reformat-files
+pnpm i && pnpm package
+popd
+
 # -----------------------------------------------------------------------------
 # Now the meat.....
 pnpm i
