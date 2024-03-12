@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import {
+  Box,
   Card,
   CardActions,
   CardHeader,
@@ -14,7 +15,7 @@ import InstallDesktopIcon from '@mui/icons-material/InstallDesktop';
 import InfoIcon from '@mui/icons-material/Info';
 import DeleteForeverOutlinedIcon from '@mui/icons-material/DeleteForeverOutlined';
 import UpgradeIcon from '@mui/icons-material/Upgrade';
-import { WrappedComponentProps } from 'react-intl';
+import { WrappedComponentProps, defineMessages, injectIntl } from 'react-intl';
 import { observer } from 'mobx-react';
 import { ITheme } from '../../../models/Theme';
 import { StoresProps } from '../../../@types/ferdium-components.types';
@@ -29,8 +30,21 @@ const debug = require('../../../preload-safe-debug')('Ferdium:ThemeSelector');
 
 const DIALOG_HEIGHT = 600;
 
+const messages = defineMessages({
+  defaultTheme: {
+    id: 'settings.theme.defaultTheme',
+    defaultMessage: 'Default',
+  },
+});
+
 function ThemeSelector(props: MediaPProps) {
-  const { themes: initThemes, searchTerm, stores, activeSetttingsTab } = props;
+  const {
+    themes: initThemes,
+    searchTerm,
+    stores,
+    activeSetttingsTab,
+    intl,
+  } = props;
 
   const { selectedTheme, needsUpdate } = stores.themes;
 
@@ -129,19 +143,31 @@ function ThemeSelector(props: MediaPProps) {
           <Card
             key="default"
             className={`card ${selectedTheme === null ? 'selected' : ''}`}
+            sx={{ height: 224, width: 160 }}
           >
-            <div
+            <Box
               onClick={() => handleThemeClick(null)}
               onKeyDown={() => handleThemeClick(null)}
               role="button"
               tabIndex={0}
+              sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center',
+                alignItems: 'center',
+                gap: '1rem',
+              }}
             >
               <CardHeader
-                title="Default Theme"
-                // subheader={theme.version}
+                title={intl.formatMessage(messages.defaultTheme)}
                 sx={{ height: 'min-content' }}
               />
-            </div>
+              <img
+                src="./assets/images/logo.svg"
+                width={50}
+                alt="Ferdium logo"
+              />
+            </Box>
           </Card>
         )}
         {currentThemes.map(theme => {
@@ -260,4 +286,4 @@ function ThemeSelector(props: MediaPProps) {
   );
 }
 
-export default observer(ThemeSelector);
+export default injectIntl(observer(ThemeSelector));
