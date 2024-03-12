@@ -1,6 +1,9 @@
 import { Component, ReactElement } from 'react';
 import { inject, observer } from 'mobx-react';
 import { defineMessages, injectIntl, WrappedComponentProps } from 'react-intl';
+import ClearIcon from '@mui/icons-material/Clear';
+import SearchIcon from '@mui/icons-material/Search';
+import { Box, IconButton } from '@mui/material';
 import { StoresProps } from '../../@types/ferdium-components.types';
 import ErrorBoundary from '../../components/util/ErrorBoundary';
 
@@ -38,6 +41,7 @@ interface ThemeScreenProps extends StoresProps, WrappedComponentProps {}
 interface ThemeScreenState {
   search: string;
   activeSetttingsTab: string;
+  isSearching: boolean;
 }
 
 @inject('stores', 'actions')
@@ -49,6 +53,7 @@ class ThemeScreen extends Component<ThemeScreenProps, ThemeScreenState> {
     this.state = {
       search: '',
       activeSetttingsTab: 'installed',
+      isSearching: false,
     };
 
     this.props.stores.themes.setup();
@@ -69,7 +74,44 @@ class ThemeScreen extends Component<ThemeScreenProps, ThemeScreenState> {
       <ErrorBoundary>
         <div className="settings__main">
           <div className="settings__header">
-            <H1>{intl.formatMessage(messages.themesHeader)}</H1>
+            {this.state.isSearching ? (
+              <Box
+                sx={{
+                  display: 'flex',
+                  height: 'min-content',
+                  position: 'relative',
+                  justifyContent: 'flex-end',
+                  gap: '1rem',
+                }}
+              >
+                <Input
+                  placeholder="Search"
+                  value={this.state.search}
+                  onChange={e => {
+                    this.setState({ search: e.target.value });
+                  }}
+                  className="search-input--themes"
+                />
+                <IconButton
+                  onClick={() =>
+                    this.setState({ search: '', isSearching: false })
+                  }
+                  type="button"
+                >
+                  <ClearIcon />
+                </IconButton>
+              </Box>
+            ) : (
+              <Box sx={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                <H1>{intl.formatMessage(messages.themesHeader)}</H1>
+                <IconButton
+                  onClick={() => this.setState({ isSearching: true })}
+                  type="button"
+                >
+                  <SearchIcon />
+                </IconButton>
+              </Box>
+            )}
           </div>
           <div className="settings__body">
             {/* Titles */}
@@ -102,19 +144,6 @@ class ThemeScreen extends Component<ThemeScreenProps, ThemeScreenState> {
                 {intl.formatMessage(messages.headlineNotInstalled)} (
                 {notInstalledThemes.length})
               </H5>
-              <div
-                style={{
-                  height: 'min-content',
-                  position: 'relative',
-                }}
-              >
-                <Input
-                  placeholder="Search"
-                  onChange={e => {
-                    this.setState({ search: e.target.value });
-                  }}
-                />
-              </div>
             </div>
 
             {/* Themes */}
