@@ -2,6 +2,7 @@ import { action, computed, makeObservable, observable } from 'mobx';
 
 import { ensureDir, readJSON, readdir, rmdir } from 'fs-extra';
 
+import semver from 'semver';
 import { Stores } from '../@types/stores.types';
 import { ApiInterface } from '../api';
 import { Actions } from '../actions/lib/actions';
@@ -24,6 +25,18 @@ export default class ThemesStore extends TypedStore {
   @observable selectedTheme: ITheme | null = null;
 
   @observable isInstalling: boolean = false;
+
+  @computed get needsUpdate(): ITheme[] {
+    return this.installedThemes.filter(theme =>
+      this.availableThemes.some(
+        availableTheme =>
+          availableTheme.id === theme.id &&
+          availableTheme.version &&
+          theme.version &&
+          semver.gt(availableTheme.version, theme.version),
+      ),
+    );
+  }
 
   @observable requestThemesRequest: CachedRequest = new CachedRequest(
     this.api.themes,
@@ -49,6 +62,17 @@ export default class ThemesStore extends TypedStore {
 
     makeObservable(this);
 
+    // TODO: Reaction to auto-update themes. This is not working yet
+    // autorun(() => {
+    //   if (
+    //     this.needsUpdate.length > 0
+    //     // &&
+    //     // this.stores.settings.all.app.autoUpdateThemes
+    //   ) {
+    //     this.updateAllThemes();
+    //   }
+    // });
+
     // Register action handlers
   }
 
@@ -58,23 +82,26 @@ export default class ThemesStore extends TypedStore {
     await this._loadSelectedTheme();
   }
 
+  // @action async updateAllThemes(): Promise<void> {
+  //   for (const installedTheme of this.needsUpdate) {
+  //     // eslint-disable-next-line no-await-in-loop
+  //     await this.updateTheme(installedTheme);
+  //   }
+  // }
+
+  @action async updateTheme(theme: ITheme): Promise<void> {
+    await this.uninstallTheme(theme);
+    await this.installTheme(theme);
+
+    if (this.selectedTheme?.id === theme.id) {
+      this.changeSelectedTheme(theme);
+    }
+  }
+
   @action async installTheme(theme: ITheme): Promise<void> {
     this.isInstalling = true;
 
     await this.downloadThemeRequest.execute(theme.id).promise;
-
-    // const themePath = userDataPath('config', 'themes', theme.id);
-
-    // try {
-    //   const GITHUB_BASE_PATH = `themes/${theme.id}`;
-    //   await ensureDir(themePath);
-
-    //   // Fetch the data from URL
-    //   await downloadThemeFromGit(GITHUB_BASE_PATH);
-    // } catch (error) {
-    //   await rmdir(themePath);
-    //   debug('Error installing theme', error);
-    // }
 
     await this.loadLocalThemes();
     this.isInstalling = false;

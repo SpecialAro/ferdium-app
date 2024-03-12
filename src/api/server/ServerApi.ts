@@ -406,10 +406,11 @@ export default class ServerApi {
     await sleep(10);
 
     const { id } = readJsonSync(join(themesTempDirectory, 'theme.json'));
-    const recipeDirectory = join(themesDirectory, id);
-    copySync(themesTempDirectory, recipeDirectory);
+    const themeDir = join(themesDirectory, id);
+    copySync(themesTempDirectory, themeDir);
     removeSync(themesTempDirectory);
     removeSync(join(themesTempDirectory, themeId, 'theme.tar.gz'));
+    removeSync(join(themeDir, 'theme.tar.gz'));
 
     // Check if directory is empty and remove it
     // const files = readdirSync(themesTempDirectory);

@@ -37,7 +37,7 @@ const messages = defineMessages({
   },
   themes: {
     id: 'settings.navigation.themes',
-    defaultMessage: 'Themes Market',
+    defaultMessage: 'Themes',
   },
   supportFerdium: {
     id: 'settings.navigation.supportFerdium',

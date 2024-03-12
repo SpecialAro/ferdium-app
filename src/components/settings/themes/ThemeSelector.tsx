@@ -13,6 +13,7 @@ import {
 import InstallDesktopIcon from '@mui/icons-material/InstallDesktop';
 import InfoIcon from '@mui/icons-material/Info';
 import DeleteForeverOutlinedIcon from '@mui/icons-material/DeleteForeverOutlined';
+import UpgradeIcon from '@mui/icons-material/Upgrade';
 import { WrappedComponentProps } from 'react-intl';
 import { observer } from 'mobx-react';
 import { ITheme } from '../../../models/Theme';
@@ -31,7 +32,7 @@ const DIALOG_HEIGHT = 600;
 function ThemeSelector(props: MediaPProps) {
   const { themes: initThemes, searchTerm, stores, activeSetttingsTab } = props;
 
-  const { selectedTheme } = stores.themes;
+  const { selectedTheme, needsUpdate } = stores.themes;
 
   const showingInstalledThemes = activeSetttingsTab === 'installed';
 
@@ -100,6 +101,10 @@ function ThemeSelector(props: MediaPProps) {
     stores.themes.installTheme(theme);
   };
 
+  const handleUpdateClick = (theme: ITheme) => {
+    stores.themes.updateTheme(theme);
+  };
+
   return (
     <>
       {pageCount !== 0 && (
@@ -140,6 +145,10 @@ function ThemeSelector(props: MediaPProps) {
           </Card>
         )}
         {currentThemes.map(theme => {
+          const newVersion = stores.themes.availableThemes.find(
+            t => t.id === theme.id,
+          );
+          const updateTheme = needsUpdate.some(t => t.id === theme.id);
           return (
             <Card
               key={theme.id}
@@ -153,7 +162,7 @@ function ThemeSelector(props: MediaPProps) {
               >
                 <CardHeader
                   title={theme.name}
-                  subheader={theme.version}
+                  subheader={`${theme.version}${updateTheme ? ` -> ${newVersion?.version}` : ''}`}
                   sx={{ height: 'min-content' }}
                 />
                 <CardMedia
@@ -164,6 +173,14 @@ function ThemeSelector(props: MediaPProps) {
                 />
               </div>
               <CardActions sx={{ justifyContent: 'center' }}>
+                {updateTheme && (
+                  <IconButton
+                    aria-label="update"
+                    onClick={() => handleUpdateClick(theme)}
+                  >
+                    <UpgradeIcon />
+                  </IconButton>
+                )}
                 <IconButton
                   aria-label="install"
                   onClick={() => handleInstallClick(theme)}

@@ -85,7 +85,8 @@ class ThemeScreen extends Component<ThemeScreenProps, ThemeScreenState> {
                   this.setActiveSettingsTab('installed');
                 }}
               >
-                {intl.formatMessage(messages.headlineInstalled)}
+                {intl.formatMessage(messages.headlineInstalled)} (
+                {installedThemes.length})
               </H5>
               <H5
                 id="not-installed"
@@ -98,7 +99,8 @@ class ThemeScreen extends Component<ThemeScreenProps, ThemeScreenState> {
                   this.setActiveSettingsTab('not-installed');
                 }}
               >
-                {intl.formatMessage(messages.headlineNotInstalled)}
+                {intl.formatMessage(messages.headlineNotInstalled)} (
+                {notInstalledThemes.length})
               </H5>
               <div
                 style={{
