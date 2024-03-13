@@ -179,7 +179,7 @@ function ThemeSelector(props: MediaPProps) {
           justifyContent: 'center',
         }}
       >
-        {showingInstalledThemes && page === 1 && (
+        {showingInstalledThemes && page === 1 && searchTerm === '' && (
           <Card
             key="default"
             className={`card ${selectedTheme === null ? 'selected' : ''}`}
@@ -235,12 +235,14 @@ function ThemeSelector(props: MediaPProps) {
                   }
                   sx={{ height: 'min-content' }}
                 />
-                <CardMedia
-                  component="img"
-                  height="100"
-                  src={theme.preview ?? 'https://via.placeholder.com/150'}
-                  alt={theme.name}
-                />
+                {theme.preview && (
+                  <CardMedia
+                    component="img"
+                    className="theme-preview--small"
+                    src={theme.preview}
+                    alt={theme.name}
+                  />
+                )}
               </div>
               <CardActions sx={{ justifyContent: 'center' }}>
                 {updateTheme && (
@@ -332,9 +334,9 @@ function ThemeSelector(props: MediaPProps) {
         <DialogContent>
           {themeForDialog?.preview && (
             <CardMedia
+              className="theme-preview--info"
               component="img"
-              height="300"
-              src={themeForDialog?.preview ?? 'https://via.placeholder.com/150'}
+              src={themeForDialog?.preview}
               alt={themeForDialog?.name}
             />
           )}
