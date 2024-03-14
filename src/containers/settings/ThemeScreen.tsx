@@ -16,7 +16,7 @@ import ThemeSelector from '../../components/settings/themes/ThemeSelector';
 const messages = defineMessages({
   themesHeader: {
     id: 'settings.theme.themesHeader',
-    defaultMessage: 'Theme Marketplace',
+    defaultMessage: 'Themes Marketplace',
   },
   installedSection: {
     id: 'settings.theme.installedSection',

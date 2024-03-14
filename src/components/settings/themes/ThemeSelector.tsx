@@ -65,6 +65,7 @@ function ThemeSelector(props: MediaPProps) {
 
   const [page, setPage] = useState(1);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies:
   useEffect(() => {
     setPage(1);
   }, [searchTerm]);
