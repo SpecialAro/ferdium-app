@@ -11,7 +11,7 @@ import {
   SIDEBAR_SERVICES_LOCATION_CENTER,
   SIDEBAR_SERVICES_LOCATION_BOTTOMRIGHT,
 } from '../../config';
-import { userDataPath } from '../../environment-remote';
+import { userDataThemesPath } from '../../environment-remote';
 
 const STYLE_ELEMENT_ID = 'custom-appearance-style';
 
@@ -62,7 +62,7 @@ function readCssFileInFolder(folderPath) {
 }
 
 function generateUserCustomCSS(selectedTheme: string) {
-  const path = userDataPath('config', 'themes', selectedTheme);
+  const path = userDataThemesPath(selectedTheme);
 
   // get all css files in the theme folder
   return readCssFileInFolder(path);

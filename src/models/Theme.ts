@@ -5,4 +5,5 @@ export interface ITheme {
   author: string;
   version: string;
   preview: string;
+  isDev?: true;
 }

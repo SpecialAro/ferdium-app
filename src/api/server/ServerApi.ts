@@ -22,7 +22,11 @@ import UserModel from '../../models/User';
 import sleep from '../../helpers/async-helpers';
 
 import { SERVER_NOT_LOADED } from '../../config';
-import { userDataPath, userDataRecipesPath } from '../../environment-remote';
+import {
+  userDataPath,
+  userDataRecipesPath,
+  userDataThemesPath,
+} from '../../environment-remote';
 import { asarRecipesPath } from '../../helpers/asar-helpers';
 import apiBase from '../apiBase';
 import {
@@ -363,7 +367,7 @@ export default class ServerApi {
     if (apiBase() === SERVER_NOT_LOADED) {
       throw new Error('Server not loaded');
     }
-    const themesDirectory = userDataPath('config', 'themes');
+    const themesDirectory = userDataThemesPath();
     const themesTempBase = userDataPath('config', 'themes-temp');
     const themesTempDirectory = join(themesTempBase, themeId);
     const tempArchivePath = join(themesTempDirectory, 'theme.tar.gz');
