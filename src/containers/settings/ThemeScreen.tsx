@@ -59,7 +59,7 @@ interface ThemeScreenProps extends StoresProps, WrappedComponentProps {}
 
 interface ThemeScreenState {
   search: string;
-  activeSetttingsTab: string;
+  activeSettingsTab: string;
   isSearching: boolean;
   onlyCustomThemes: boolean;
   onlyUpdates: boolean;
@@ -73,7 +73,7 @@ class ThemeScreen extends Component<ThemeScreenProps, ThemeScreenState> {
 
     this.state = {
       search: '',
-      activeSetttingsTab: 'installed',
+      activeSettingsTab: 'installed',
       isSearching: false,
       onlyCustomThemes: false,
       onlyUpdates: false,
@@ -84,7 +84,7 @@ class ThemeScreen extends Component<ThemeScreenProps, ThemeScreenState> {
 
   setActiveSettingsTab(tab) {
     this.setState({
-      activeSetttingsTab: tab,
+      activeSettingsTab: tab,
     });
   }
 
@@ -159,7 +159,7 @@ class ThemeScreen extends Component<ThemeScreenProps, ThemeScreenState> {
               <H5
                 id="installed"
                 className={
-                  this.state.activeSetttingsTab === 'installed'
+                  this.state.activeSettingsTab === 'installed'
                     ? 'badge badge--primary'
                     : 'badge'
                 }
@@ -173,7 +173,7 @@ class ThemeScreen extends Component<ThemeScreenProps, ThemeScreenState> {
               <H5
                 id="not-installed"
                 className={
-                  this.state.activeSetttingsTab === 'not-installed'
+                  this.state.activeSettingsTab === 'not-installed'
                     ? 'badge badge--primary'
                     : 'badge'
                 }
@@ -189,7 +189,7 @@ class ThemeScreen extends Component<ThemeScreenProps, ThemeScreenState> {
             {/* Themes */}
 
             {/* Filter */}
-            {this.state.activeSetttingsTab === 'installed' &&
+            {this.state.activeSettingsTab === 'installed' &&
               (devThemes.length > 0 ||
                 this.props.stores.themes.needsUpdate.length > 0) && (
                 <FormControl
@@ -244,12 +244,12 @@ class ThemeScreen extends Component<ThemeScreenProps, ThemeScreenState> {
               )}
 
             {/* Installed */}
-            {this.state.activeSetttingsTab === 'installed' && (
+            {this.state.activeSettingsTab === 'installed' && (
               <ThemeSelector
                 {...this.props}
                 themes={filteredThemes}
                 searchTerm={this.state.search}
-                activeSetttingsTab={this.state.activeSetttingsTab}
+                activeSettingsTab={this.state.activeSettingsTab}
                 hideDefaultTheme={
                   this.state.onlyCustomThemes || this.state.onlyUpdates
                 }
@@ -257,17 +257,17 @@ class ThemeScreen extends Component<ThemeScreenProps, ThemeScreenState> {
             )}
 
             {/* Not installed */}
-            {this.state.activeSetttingsTab === 'not-installed' && (
+            {this.state.activeSettingsTab === 'not-installed' && (
               <ThemeSelector
                 {...this.props}
                 themes={notInstalledThemes}
                 searchTerm={this.state.search}
-                activeSetttingsTab={this.state.activeSetttingsTab}
+                activeSettingsTab={this.state.activeSettingsTab}
               />
             )}
 
             {/* Updates */}
-            {/* {this.state.activeSetttingsTab === 'updates' && (
+            {/* {this.state.activeSettingsTab === 'updates' && (
               <ThemeSelector
                 themes={notInstalledThemes}
                 searchTerm={this.state.search}

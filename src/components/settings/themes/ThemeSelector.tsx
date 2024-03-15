@@ -30,7 +30,7 @@ import Tooltip from '../../ui/Tooltip/Tooltip';
 interface MediaPProps extends StoresProps, WrappedComponentProps {
   themes: ITheme[];
   searchTerm: string;
-  activeSetttingsTab: string;
+  activeSettingsTab: string;
   hideDefaultTheme?: boolean;
 }
 
@@ -78,14 +78,14 @@ function ThemeSelector(props: MediaPProps) {
     themes: initThemes,
     searchTerm,
     stores,
-    activeSetttingsTab,
+    activeSettingsTab,
     intl,
     hideDefaultTheme = false,
   } = props;
 
   const { selectedTheme, needsUpdate } = stores.themes;
 
-  const showingInstalledThemes = activeSetttingsTab === 'installed';
+  const showingInstalledThemes = activeSettingsTab === 'installed';
 
   let themes = initThemes;
 

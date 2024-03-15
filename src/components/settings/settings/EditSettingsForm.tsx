@@ -323,7 +323,7 @@ interface IProps extends WrappedComponentProps {
 }
 
 interface IState {
-  activeSetttingsTab: string;
+  activeSettingsTab: string;
   clearCacheButtonClicked: boolean;
 }
 
@@ -333,14 +333,14 @@ class EditSettingsForm extends Component<IProps, IState> {
     super(props);
 
     this.state = {
-      activeSetttingsTab: 'general',
+      activeSettingsTab: 'general',
       clearCacheButtonClicked: false,
     };
   }
 
   setActiveSettingsTab(tab) {
     this.setState({
-      activeSetttingsTab: tab,
+      activeSettingsTab: tab,
     });
   }
 
@@ -425,7 +425,7 @@ class EditSettingsForm extends Component<IProps, IState> {
     let cacheSize;
     let notCleared;
 
-    if (this.state.activeSetttingsTab === 'advanced') {
+    if (this.state.activeSettingsTab === 'advanced') {
       const cacheSizeBytes = getCacheSize();
       debug('cacheSizeBytes:', cacheSizeBytes);
       if (typeof cacheSizeBytes === 'number') {
@@ -461,7 +461,7 @@ class EditSettingsForm extends Component<IProps, IState> {
               <H5
                 id="general"
                 className={
-                  this.state.activeSetttingsTab === 'general'
+                  this.state.activeSettingsTab === 'general'
                     ? 'badge badge--primary'
                     : 'badge'
                 }
@@ -474,7 +474,7 @@ class EditSettingsForm extends Component<IProps, IState> {
               <H5
                 id="services"
                 className={
-                  this.state.activeSetttingsTab === 'services'
+                  this.state.activeSettingsTab === 'services'
                     ? 'badge badge--primary'
                     : 'badge'
                 }
@@ -487,7 +487,7 @@ class EditSettingsForm extends Component<IProps, IState> {
               <H5
                 id="appearance"
                 className={
-                  this.state.activeSetttingsTab === 'appearance'
+                  this.state.activeSettingsTab === 'appearance'
                     ? 'badge badge--primary'
                     : 'badge'
                 }
@@ -500,7 +500,7 @@ class EditSettingsForm extends Component<IProps, IState> {
               <H5
                 id="privacy"
                 className={
-                  this.state.activeSetttingsTab === 'privacy'
+                  this.state.activeSettingsTab === 'privacy'
                     ? 'badge badge--primary'
                     : 'badge'
                 }
@@ -513,7 +513,7 @@ class EditSettingsForm extends Component<IProps, IState> {
               <H5
                 id="language"
                 className={
-                  this.state.activeSetttingsTab === 'language'
+                  this.state.activeSettingsTab === 'language'
                     ? 'badge badge--primary'
                     : 'badge'
                 }
@@ -526,7 +526,7 @@ class EditSettingsForm extends Component<IProps, IState> {
               <H5
                 id="advanced"
                 className={
-                  this.state.activeSetttingsTab === 'advanced'
+                  this.state.activeSettingsTab === 'advanced'
                     ? 'badge badge--primary'
                     : 'badge'
                 }
@@ -539,7 +539,7 @@ class EditSettingsForm extends Component<IProps, IState> {
               <H5
                 id="updates"
                 className={
-                  this.state.activeSetttingsTab === 'updates'
+                  this.state.activeSettingsTab === 'updates'
                     ? 'badge badge--primary'
                     : 'badge'
                 }
@@ -558,7 +558,7 @@ class EditSettingsForm extends Component<IProps, IState> {
             </div>
 
             {/* General */}
-            {this.state.activeSetttingsTab === 'general' && (
+            {this.state.activeSettingsTab === 'general' && (
               <div>
                 <H2 className="settings__section_header">
                   {intl.formatMessage(messages.sectionMain)}
@@ -671,7 +671,7 @@ class EditSettingsForm extends Component<IProps, IState> {
             )}
 
             {/* Services */}
-            {this.state.activeSetttingsTab === 'services' && (
+            {this.state.activeSettingsTab === 'services' && (
               <div>
                 <H2 className="settings__section_header">
                   {intl.formatMessage(messages.sectionServiceIconsSettings)}
@@ -726,7 +726,7 @@ class EditSettingsForm extends Component<IProps, IState> {
             )}
 
             {/* Appearance */}
-            {this.state.activeSetttingsTab === 'appearance' && (
+            {this.state.activeSettingsTab === 'appearance' && (
               <div>
                 <H2 className="settings__section_header">
                   {intl.formatMessage(messages.sectionGeneralUi)}
@@ -838,7 +838,7 @@ class EditSettingsForm extends Component<IProps, IState> {
             )}
 
             {/* Privacy */}
-            {this.state.activeSetttingsTab === 'privacy' && (
+            {this.state.activeSettingsTab === 'privacy' && (
               <div>
                 <H2 className="settings__section_header">
                   {intl.formatMessage(messages.sectionPrivacy)}
@@ -927,7 +927,7 @@ class EditSettingsForm extends Component<IProps, IState> {
             )}
 
             {/* Language */}
-            {this.state.activeSetttingsTab === 'language' && (
+            {this.state.activeSettingsTab === 'language' && (
               <div>
                 <H2 className="settings__section_header">
                   {intl.formatMessage(messages.sectionLanguage)}
@@ -977,7 +977,7 @@ class EditSettingsForm extends Component<IProps, IState> {
             )}
 
             {/* Advanced */}
-            {this.state.activeSetttingsTab === 'advanced' && (
+            {this.state.activeSettingsTab === 'advanced' && (
               <div>
                 <H2 className="settings__section_header">
                   {intl.formatMessage(messages.sectionAdvanced)}
@@ -1119,7 +1119,7 @@ class EditSettingsForm extends Component<IProps, IState> {
             )}
 
             {/* Updates */}
-            {this.state.activeSetttingsTab === 'updates' && (
+            {this.state.activeSettingsTab === 'updates' && (
               <div>
                 <H2 className="settings__section_header">
                   {intl.formatMessage(messages.sectionUpdates)}
