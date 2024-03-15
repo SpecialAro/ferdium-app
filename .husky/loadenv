@@ -1,0 +1,24 @@
+#!/bin/sh
+
+DIR="$(dirname "$0")"
+
+# Check if nvs or nvm exists otherwise skip
+if command -v nvs >/dev/null 2>&1; then
+  NODE_MANAGER="nvs.sh"
+elif command -v nvm >/dev/null 2>&1; then
+  NODE_MANAGER="nvm.sh"
+fi
+
+# IF $NODE_MANAGER is set, then use it
+if [ -n "$NODE_MANAGER" ]; then
+  echo "Using $NODE_MANAGER"
+  . "$NODE_MANAGER" use
+fi
+
+# Check if pnpm exists otherwise install it globally with npm
+if ! command -v pnpm >/dev/null 2>&1; then
+  echo "pnpm is not installed, installing globally"
+  PACKAGE_JSON_PATH="$(dirname "$DIR")/../package.json"
+  pnpm_version=$(node -pe "require('$PACKAGE_JSON_PATH').engines.pnpm")
+  npm install -gf "pnpm@$pnpm_version"
+fi

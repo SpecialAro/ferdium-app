@@ -1,10 +1,16 @@
 #!/bin/sh
 
-FILE_NAME="$(dirname "$0")/_/husky.sh"
+DIR="$(dirname "$0")"
+
+FILE_NAME="$DIR/_/husky.sh"
 
 # Conditionally invoke so as to avoid running pnpm commands if this is a clean checkout (ie before installing node modules)
 if [ -f $FILE_NAME ]; then
   . $FILE_NAME
+
+  # Call the external file to load node modules
+  . "$DIR/loadenv"
+
   pnpm prepare-code
   pnpm test
 fi
