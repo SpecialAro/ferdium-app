@@ -31,6 +31,7 @@ interface MediaPProps extends StoresProps, WrappedComponentProps {
   themes: ITheme[];
   searchTerm: string;
   activeSetttingsTab: string;
+  hideDefaultTheme?: boolean;
 }
 
 const debug = require('../../../preload-safe-debug')('Ferdium:ThemeSelector');
@@ -79,6 +80,7 @@ function ThemeSelector(props: MediaPProps) {
     stores,
     activeSetttingsTab,
     intl,
+    hideDefaultTheme = false,
   } = props;
 
   const { selectedTheme, needsUpdate } = stores.themes;
@@ -232,37 +234,40 @@ function ThemeSelector(props: MediaPProps) {
           justifyContent: 'center',
         }}
       >
-        {showingInstalledThemes && page === 1 && searchTerm === '' && (
-          <Card
-            key="default"
-            className={`card ${selectedTheme === null ? 'selected' : ''}`}
-            sx={{ height: 224, width: 160 }}
-          >
-            <Box
-              onClick={() => handleThemeClick(null)}
-              onKeyDown={() => handleThemeClick(null)}
-              role="button"
-              tabIndex={0}
-              sx={{
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'center',
-                alignItems: 'center',
-                gap: '1rem',
-              }}
+        {showingInstalledThemes &&
+          page === 1 &&
+          searchTerm === '' &&
+          !hideDefaultTheme && (
+            <Card
+              key="default"
+              className={`card ${selectedTheme === null ? 'selected' : ''}`}
+              sx={{ height: 224, width: 160 }}
             >
-              <CardHeader
-                title={intl.formatMessage(messages.defaultTheme)}
-                sx={{ height: 'min-content' }}
-              />
-              <img
-                src="./assets/images/logo.svg"
-                width={50}
-                alt="Ferdium logo"
-              />
-            </Box>
-          </Card>
-        )}
+              <Box
+                onClick={() => handleThemeClick(null)}
+                onKeyDown={() => handleThemeClick(null)}
+                role="button"
+                tabIndex={0}
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  gap: '1rem',
+                }}
+              >
+                <CardHeader
+                  title={intl.formatMessage(messages.defaultTheme)}
+                  sx={{ height: 'min-content' }}
+                />
+                <img
+                  src="./assets/images/logo.svg"
+                  width={50}
+                  alt="Ferdium logo"
+                />
+              </Box>
+            </Card>
+          )}
         {currentThemes.map(theme => {
           const newVersion = stores.themes.availableThemes.find(
             t => t.id === theme.id,

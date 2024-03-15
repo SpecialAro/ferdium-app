@@ -3,7 +3,14 @@ import { inject, observer } from 'mobx-react';
 import { defineMessages, injectIntl, WrappedComponentProps } from 'react-intl';
 import ClearIcon from '@mui/icons-material/Clear';
 import SearchIcon from '@mui/icons-material/Search';
-import { Box, IconButton } from '@mui/material';
+import {
+  Box,
+  FormControl,
+  FormControlLabel,
+  IconButton,
+  Radio,
+  RadioGroup,
+} from '@mui/material';
 import { StoresProps } from '../../@types/ferdium-components.types';
 import ErrorBoundary from '../../components/util/ErrorBoundary';
 
@@ -34,6 +41,18 @@ const messages = defineMessages({
     id: 'settings.theme.headlineNotInstalled',
     defaultMessage: 'Not installed',
   },
+  radioShowAll: {
+    id: 'settings.theme.radioShowAll',
+    defaultMessage: 'Show all',
+  },
+  radioOnlyUpdates: {
+    id: 'settings.theme.radioOnlyUpdates',
+    defaultMessage: 'Only updates',
+  },
+  radioOnlyCustomThemes: {
+    id: 'settings.theme.radioOnlyCustomThemes',
+    defaultMessage: 'Only custom themes',
+  },
 });
 
 interface ThemeScreenProps extends StoresProps, WrappedComponentProps {}
@@ -42,6 +61,8 @@ interface ThemeScreenState {
   search: string;
   activeSetttingsTab: string;
   isSearching: boolean;
+  onlyCustomThemes: boolean;
+  onlyUpdates: boolean;
 }
 
 @inject('stores', 'actions')
@@ -54,6 +75,8 @@ class ThemeScreen extends Component<ThemeScreenProps, ThemeScreenState> {
       search: '',
       activeSetttingsTab: 'installed',
       isSearching: false,
+      onlyCustomThemes: false,
+      onlyUpdates: false,
     };
 
     this.props.stores.themes.setup();
@@ -69,6 +92,23 @@ class ThemeScreen extends Component<ThemeScreenProps, ThemeScreenState> {
     const { intl } = this.props;
 
     const { installedThemes, notInstalledThemes } = this.props.stores.themes;
+
+    let filteredThemes = installedThemes;
+
+    const devThemes = installedThemes.filter(
+      theme => theme.isDev !== undefined,
+    );
+
+    if (
+      this.state.onlyUpdates &&
+      this.props.stores.themes.needsUpdate.length > 0
+    ) {
+      filteredThemes = this.props.stores.themes.needsUpdate;
+    }
+
+    if (this.state.onlyCustomThemes && devThemes.length > 0) {
+      filteredThemes = devThemes;
+    }
 
     return (
       <ErrorBoundary>
@@ -148,13 +188,71 @@ class ThemeScreen extends Component<ThemeScreenProps, ThemeScreenState> {
 
             {/* Themes */}
 
+            {/* Filter */}
+            {this.state.activeSetttingsTab === 'installed' &&
+              (devThemes.length > 0 ||
+                this.props.stores.themes.needsUpdate.length > 0) && (
+                <FormControl
+                  onChange={e => {
+                    const { value } = e.target as HTMLInputElement;
+                    this.setState({
+                      onlyCustomThemes: value === 'custom',
+                      onlyUpdates: value === 'updates',
+                    });
+                  }}
+                  sx={{
+                    height: 'fit-content',
+                    width: '-webkit-fill-available',
+                    marginBottom: '1.2rem',
+                  }}
+                >
+                  <RadioGroup
+                    aria-labelledby="demo-radio-buttons-group-label"
+                    defaultValue="all"
+                    name="radio-buttons-group"
+                    sx={{
+                      display: 'flex',
+                      flexDirection: 'row',
+                      gap: '1rem',
+                      height: 'fit-content',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <FormControlLabel
+                      value="all"
+                      control={<Radio />}
+                      label={intl.formatMessage(messages.radioShowAll)}
+                    />
+                    {this.props.stores.themes.needsUpdate.length > 0 && (
+                      <FormControlLabel
+                        value="updates"
+                        control={<Radio />}
+                        label={intl.formatMessage(messages.radioOnlyUpdates)}
+                      />
+                    )}
+                    {devThemes.length > 0 && (
+                      <FormControlLabel
+                        value="custom"
+                        control={<Radio />}
+                        label={intl.formatMessage(
+                          messages.radioOnlyCustomThemes,
+                        )}
+                      />
+                    )}
+                  </RadioGroup>
+                </FormControl>
+              )}
+
             {/* Installed */}
             {this.state.activeSetttingsTab === 'installed' && (
               <ThemeSelector
                 {...this.props}
-                themes={installedThemes}
+                themes={filteredThemes}
                 searchTerm={this.state.search}
                 activeSetttingsTab={this.state.activeSetttingsTab}
+                hideDefaultTheme={
+                  this.state.onlyCustomThemes || this.state.onlyUpdates
+                }
               />
             )}
 
