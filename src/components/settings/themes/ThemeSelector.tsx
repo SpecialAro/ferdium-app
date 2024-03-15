@@ -24,6 +24,7 @@ import { StoresProps } from '../../../@types/ferdium-components.types';
 import { H1 } from '../../ui/headline';
 import { openPath } from '../../../helpers/url-helpers';
 import { userDataThemesPath } from '../../../environment-remote';
+import Tooltip from '../../ui/Tooltip/Tooltip';
 
 interface MediaPProps extends StoresProps, WrappedComponentProps {
   themes: ITheme[];
@@ -43,6 +44,30 @@ const messages = defineMessages({
   customTheme: {
     id: 'settings.theme.dev',
     defaultMessage: 'Custom theme',
+  },
+  tooltipThemeFolder: {
+    id: 'settings.theme.tooltip.themeFolder',
+    defaultMessage: 'Go to folder',
+  },
+  tooltipInstall: {
+    id: 'settings.theme.tooltip.tooltipInstall',
+    defaultMessage: 'Install',
+  },
+  tooltipUninstall: {
+    id: 'settings.theme.tooltip.tooltipUninstall',
+    defaultMessage: 'Uninstall',
+  },
+  tooltipClose: {
+    id: 'settings.theme.tooltip.tooltipClose',
+    defaultMessage: 'Close',
+  },
+  tooltipUpdate: {
+    id: 'settings.theme.tooltip.tooltipUpdate',
+    defaultMessage: 'Update',
+  },
+  tooltipDetails: {
+    id: 'settings.theme.tooltip.tooltipDetails',
+    defaultMessage: 'More details',
   },
 });
 
@@ -273,39 +298,81 @@ function ThemeSelector(props: MediaPProps) {
               </div>
               <CardActions sx={{ justifyContent: 'center' }}>
                 {updateTheme && (
-                  <IconButton
-                    aria-label="update"
-                    onClick={() => handleUpdateClick(theme)}
+                  <Tooltip
+                    title={
+                      <span style={{ fontSize: '1.3rem' }}>
+                        {intl.formatMessage(messages.tooltipUpdate)}
+                      </span>
+                    }
+                    arrow
+                    placement="top"
                   >
-                    <UpgradeIcon color="success" />
-                  </IconButton>
+                    <IconButton
+                      aria-label="update"
+                      onClick={() => handleUpdateClick(theme)}
+                    >
+                      <UpgradeIcon color="success" />
+                    </IconButton>
+                  </Tooltip>
                 )}
                 {theme.isDev && (
-                  <IconButton
-                    aria-label="open folder"
-                    onClick={() =>
-                      openPath(userDataThemesPath(`dev/${theme.id}`))
+                  <Tooltip
+                    title={
+                      <span style={{ fontSize: '1.3rem' }}>
+                        {intl.formatMessage(messages.tooltipThemeFolder)}
+                      </span>
                     }
+                    arrow
+                    placement="top"
                   >
-                    <DriveFileMoveIcon color="warning" />
-                  </IconButton>
+                    <IconButton
+                      aria-label="open folder"
+                      onClick={() =>
+                        openPath(userDataThemesPath(`dev/${theme.id}`))
+                      }
+                    >
+                      <DriveFileMoveIcon color="warning" />
+                    </IconButton>
+                  </Tooltip>
                 )}
-                <IconButton
-                  aria-label="install"
-                  onClick={() => handleInstallClick(theme)}
+                <Tooltip
+                  title={
+                    <span style={{ fontSize: '1.3rem' }}>
+                      {showingInstalledThemes
+                        ? intl.formatMessage(messages.tooltipUninstall)
+                        : intl.formatMessage(messages.tooltipInstall)}
+                    </span>
+                  }
+                  arrow
+                  placement="top"
                 >
-                  {showingInstalledThemes ? (
-                    <DeleteForeverOutlinedIcon color="error" />
-                  ) : (
-                    <InstallDesktopIcon color="success" />
-                  )}
-                </IconButton>
-                <IconButton
-                  aria-label="info"
-                  onClick={() => handleInfoClick(theme)}
+                  <IconButton
+                    aria-label="install"
+                    onClick={() => handleInstallClick(theme)}
+                  >
+                    {showingInstalledThemes ? (
+                      <DeleteForeverOutlinedIcon color="error" />
+                    ) : (
+                      <InstallDesktopIcon color="success" />
+                    )}
+                  </IconButton>
+                </Tooltip>
+                <Tooltip
+                  title={
+                    <span style={{ fontSize: '1.3rem' }}>
+                      {intl.formatMessage(messages.tooltipDetails)}
+                    </span>
+                  }
+                  arrow
+                  placement="top"
                 >
-                  <InfoIcon color="info" />
-                </IconButton>
+                  <IconButton
+                    aria-label="info"
+                    onClick={() => handleInfoClick(theme)}
+                  >
+                    <InfoIcon color="info" />
+                  </IconButton>
+                </Tooltip>
               </CardActions>
             </Card>
           );
@@ -343,38 +410,70 @@ function ThemeSelector(props: MediaPProps) {
             </Box>
             <div>
               {themeForDialog?.isDev && (
-                <IconButton
-                  aria-label="open folder"
-                  onClick={() =>
-                    openPath(userDataThemesPath(`dev/${themeForDialog.id}`))
+                <Tooltip
+                  title={
+                    <span style={{ fontSize: '1.3rem' }}>
+                      {intl.formatMessage(messages.tooltipThemeFolder)}
+                    </span>
                   }
+                  arrow
+                  placement="bottom"
                 >
-                  <DriveFileMoveIcon color="warning" />
-                </IconButton>
+                  <IconButton
+                    aria-label="open folder"
+                    onClick={() =>
+                      openPath(userDataThemesPath(`dev/${themeForDialog.id}`))
+                    }
+                  >
+                    <DriveFileMoveIcon color="warning" />
+                  </IconButton>
+                </Tooltip>
               )}
-              <IconButton
-                aria-label="install/uninstall"
-                onClick={() => {
-                  if (themeForDialog) {
-                    handleInstallClick(themeForDialog);
+              <Tooltip
+                title={
+                  <span style={{ fontSize: '1.3rem' }}>
+                    {showingInstalledThemes
+                      ? intl.formatMessage(messages.tooltipUninstall)
+                      : intl.formatMessage(messages.tooltipInstall)}
+                  </span>
+                }
+                arrow
+                placement="bottom"
+              >
+                <IconButton
+                  aria-label="install/uninstall"
+                  onClick={() => {
+                    if (themeForDialog) {
+                      handleInstallClick(themeForDialog);
+                      handleCloseDialog();
+                    }
+                  }}
+                >
+                  {showingInstalledThemes ? (
+                    <DeleteForeverOutlinedIcon color="error" />
+                  ) : (
+                    <InstallDesktopIcon color="success" />
+                  )}
+                </IconButton>
+              </Tooltip>
+              <Tooltip
+                title={
+                  <span style={{ fontSize: '1.3rem' }}>
+                    {intl.formatMessage(messages.tooltipClose)}
+                  </span>
+                }
+                arrow
+                placement="bottom"
+              >
+                <IconButton
+                  aria-label="close"
+                  onClick={() => {
                     handleCloseDialog();
-                  }
-                }}
-              >
-                {showingInstalledThemes ? (
-                  <DeleteForeverOutlinedIcon color="error" />
-                ) : (
-                  <InstallDesktopIcon color="success" />
-                )}
-              </IconButton>
-              <IconButton
-                aria-label="close"
-                onClick={() => {
-                  handleCloseDialog();
-                }}
-              >
-                <CloseIcon />
-              </IconButton>
+                  }}
+                >
+                  <CloseIcon />
+                </IconButton>
+              </Tooltip>
             </div>
           </div>
         </DialogTitle>

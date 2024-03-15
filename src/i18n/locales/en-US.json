@@ -420,6 +420,7 @@
   "settings.team.tryReloadUserInfoRequest": "Try reloading",
   "settings.team.userInfoRequestFailed": "User Info request failed",
   "settings.theme.defaultTheme": "Default",
+  "settings.theme.dev": "Custom theme",
   "settings.theme.headlineInstalled": "Installed",
   "settings.theme.headlineNotInstalled": "Not installed",
   "settings.theme.installedSection": "Installed",
