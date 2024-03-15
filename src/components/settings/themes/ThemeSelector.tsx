@@ -17,6 +17,7 @@ import InfoIcon from '@mui/icons-material/Info';
 import DriveFileMoveIcon from '@mui/icons-material/DriveFileMove';
 import DeleteForeverOutlinedIcon from '@mui/icons-material/DeleteForeverOutlined';
 import UpgradeIcon from '@mui/icons-material/Upgrade';
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import { WrappedComponentProps, defineMessages, injectIntl } from 'react-intl';
 import { observer } from 'mobx-react';
 import { ITheme } from '../../../models/Theme';
@@ -278,15 +279,33 @@ function ThemeSelector(props: MediaPProps) {
                 role="button"
                 tabIndex={0}
               >
-                <CardHeader
-                  title={theme.name}
-                  subheader={
-                    theme.version
-                      ? `${theme.version}${updateTheme ? ` -> ${newVersion?.version}` : ''}`
-                      : null
-                  }
-                  sx={{ height: 'min-content' }}
-                />
+                <Box style={{ display: 'flex', gap: '1rem' }}>
+                  <CardHeader
+                    title={theme.name}
+                    subheader={
+                      theme.version
+                        ? `${theme.version}${updateTheme ? ` -> ${newVersion?.version}` : ''}`
+                        : null
+                    }
+                    sx={{ height: 'min-content' }}
+                  />
+                  <Box style={{ padding: 16 }}>
+                    {theme.isDev ? (
+                      <Tooltip
+                        title={
+                          <span style={{ fontSize: '1.3rem' }}>
+                            {intl.formatMessage(messages.customTheme)}
+                          </span>
+                        }
+                        arrow
+                        placement="bottom"
+                      >
+                        <AutoAwesomeIcon color="warning" />
+                      </Tooltip>
+                    ) : undefined}
+                  </Box>
+                </Box>
+
                 {theme.preview && (
                   <CardMedia
                     component="img"
@@ -401,7 +420,26 @@ function ThemeSelector(props: MediaPProps) {
             }}
           >
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <H1>{themeForDialog?.name}</H1>
+              {themeForDialog?.isDev ? (
+                <Box
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'row',
+                    gap: '1rem',
+                    alignItems: 'center',
+                  }}
+                >
+                  <AutoAwesomeIcon
+                    color="warning"
+                    sx={{ marginBottom: '10px', fontSize: '1.2rem' }}
+                  />
+
+                  <H1>{themeForDialog?.name}</H1>
+                </Box>
+              ) : (
+                <H1>{themeForDialog?.name}</H1>
+              )}
+
               <Box
                 sx={{ display: 'flex', flexDirection: 'row', gap: '0.6rem' }}
               >
