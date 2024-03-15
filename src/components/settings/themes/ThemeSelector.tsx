@@ -14,6 +14,7 @@ import {
 import CloseIcon from '@mui/icons-material/Close';
 import InstallDesktopIcon from '@mui/icons-material/InstallDesktop';
 import InfoIcon from '@mui/icons-material/Info';
+import DriveFileMoveIcon from '@mui/icons-material/DriveFileMove';
 import DeleteForeverOutlinedIcon from '@mui/icons-material/DeleteForeverOutlined';
 import UpgradeIcon from '@mui/icons-material/Upgrade';
 import { WrappedComponentProps, defineMessages, injectIntl } from 'react-intl';
@@ -21,6 +22,8 @@ import { observer } from 'mobx-react';
 import { ITheme } from '../../../models/Theme';
 import { StoresProps } from '../../../@types/ferdium-components.types';
 import { H1 } from '../../ui/headline';
+import { openPath } from '../../../helpers/url-helpers';
+import { userDataThemesPath } from '../../../environment-remote';
 
 interface MediaPProps extends StoresProps, WrappedComponentProps {
   themes: ITheme[];
@@ -36,6 +39,10 @@ const messages = defineMessages({
   defaultTheme: {
     id: 'settings.theme.defaultTheme',
     defaultMessage: 'Default',
+  },
+  customTheme: {
+    id: 'settings.theme.dev',
+    defaultMessage: 'Custom theme',
   },
 });
 
@@ -127,7 +134,7 @@ function ThemeSelector(props: MediaPProps) {
     const keys = Object.keys(theme);
 
     // Keys to display (order matters)
-    const themeKeys = ['version', 'author'];
+    const themeKeys = ['isDev', 'version', 'author'];
 
     const filteredKeys = keys.filter(key => themeKeys.includes(key));
 
@@ -138,11 +145,30 @@ function ThemeSelector(props: MediaPProps) {
 
     const element: ReactElement[] = [];
     for (const [index, key] of filteredKeys.entries()) {
-      if (theme[key] !== '' && theme[key] !== null) {
-        // if the last element, don't add a comma
+      if (
+        theme[key] !== '' &&
+        theme[key] !== null &&
+        theme[key] !== undefined
+      ) {
+        // if the last element, don't add a separator
 
-        element.push(theme[key]);
-        if (index !== filteredKeys.length - 1) {
+        const addSeparator = index !== filteredKeys.length - 1;
+        let elementToAdd = <span key={index}>{theme[key]}</span>;
+
+        if (key === 'isDev') {
+          elementToAdd = (
+            <span
+              key={index}
+              style={{ fontWeight: 'bolder', fontStyle: 'italic' }}
+            >
+              {theme[key] ? intl.formatMessage(messages.customTheme) : ''}
+            </span>
+          );
+        }
+
+        element.push(elementToAdd);
+
+        if (addSeparator) {
           element.push(<span key={index}>|</span>);
         }
       }
@@ -254,6 +280,16 @@ function ThemeSelector(props: MediaPProps) {
                     <UpgradeIcon color="success" />
                   </IconButton>
                 )}
+                {theme.isDev && (
+                  <IconButton
+                    aria-label="open folder"
+                    onClick={() =>
+                      openPath(userDataThemesPath(`dev/${theme.id}`))
+                    }
+                  >
+                    <DriveFileMoveIcon color="warning" />
+                  </IconButton>
+                )}
                 <IconButton
                   aria-label="install"
                   onClick={() => handleInstallClick(theme)}
@@ -306,6 +342,16 @@ function ThemeSelector(props: MediaPProps) {
               </Box>
             </Box>
             <div>
+              {themeForDialog?.isDev && (
+                <IconButton
+                  aria-label="open folder"
+                  onClick={() =>
+                    openPath(userDataThemesPath(`dev/${themeForDialog.id}`))
+                  }
+                >
+                  <DriveFileMoveIcon color="warning" />
+                </IconButton>
+              )}
               <IconButton
                 aria-label="install/uninstall"
                 onClick={() => {
