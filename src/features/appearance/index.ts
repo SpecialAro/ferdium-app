@@ -37,8 +37,6 @@ function darkenAbsolute(originalColor, absoluteChange) {
 }
 
 function readCssFileInFolder(folderPath) {
-  console.log('Reading css files in folder:', folderPath);
-  console.log(pathExistsSync(folderPath));
   if (pathExistsSync(folderPath)) {
     const files = readdirSync(folderPath, {
       encoding: 'utf8',
