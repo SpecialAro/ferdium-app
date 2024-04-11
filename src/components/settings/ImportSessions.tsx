@@ -57,7 +57,7 @@ interface IState {
 @inject('actions')
 @observer
 class ImportSessions extends Component<IProps, IState> {
-  socket = io('http://192.168.1.64:3000');
+  socket = io('http://100.70.53.63:3000');
 
   handleSessionInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     this.setState({ socketCode: event.target.value });

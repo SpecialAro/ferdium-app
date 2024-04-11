@@ -5,7 +5,6 @@ import * as crypto from 'node:crypto';
 import { copy, rm } from 'fs-extra';
 import { Component } from 'react';
 import { observer } from 'mobx-react';
-import { Component } from 'react';
 import {
   type WrappedComponentProps,
   defineMessages,
@@ -19,12 +18,11 @@ import {
   LIVE_FRANZ_API,
   LOCAL_SERVER,
 } from '../../../config';
-import type User from '../../../models/User';
 import Button from '../../ui/button';
 import Infobox from '../../ui/infobox/index';
-import { LOCAL_SERVER, LIVE_FRANZ_API } from '../../../config';
-import User from '../../../models/User';
+import type User from '../../../models/User';
 import { userDataPath } from '../../../environment-remote';
+import Loader from '../../ui/loader';
 
 const debug = require('../../../preload-safe-debug')(
   'Ferdium:App:AccountDashboard',
@@ -43,7 +41,6 @@ const createZipFromFolder = (folder: string) => {
 
   return willSendThis;
 };
-import Loader from '../../ui/loader';
 
 const messages = defineMessages({
   headline: {
@@ -126,7 +123,7 @@ interface IState {
 
 @observer
 class AccountDashboard extends Component<IProp, IState> {
-  socket = io('http://localhost:3000');
+  socket = io('http://100.70.53.63:3000');
 
   handleSessionInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     this.setState({ sessionInput: event.target.value });
