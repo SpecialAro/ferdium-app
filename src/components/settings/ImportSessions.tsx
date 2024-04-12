@@ -48,6 +48,7 @@ interface IState {
     publicKey: string;
     privateKey: string;
   };
+  receivedChunks: any[];
 }
 
 @inject('actions')
@@ -70,6 +71,7 @@ class ImportSessions extends Component<IProps, IState> {
         publicKey: '',
         privateKey: '',
       },
+      receivedChunks: [],
     };
   }
 
@@ -83,13 +85,48 @@ class ImportSessions extends Component<IProps, IState> {
       this.setState({ isSocketConnected: true });
     });
 
-    socket.on('disconnect', () => {
-      debug('Disconnected from socket');
+    socket.on('disconnect', (reason, details) => {
+      // the reason of the disconnection, for example "transport error"
+      debug(reason);
+
+      // the low-level reason of the disconnection, for example "xhr post error"
+      debug(details.message);
+
+      // some additional description, for example the status code of the HTTP response
+      debug(details.description);
+
+      // some additional context, for example the XMLHttpRequest object
+      debug(details.context);
       this.setState({ isSocketConnected: false });
     });
 
+    socket.on('connect_error', (err: any) => {
+      // the reason of the error, for example "xhr poll error"
+      debug(err.message);
+
+      // some additional description, for example the status code of the initial HTTP response
+      debug(err.description);
+
+      // some additional context, for example the XMLHttpRequest object
+      debug(err.context);
+    });
+
     socket.on('receive-file', async data => {
+      // Handle received chunks here
+      debug('Receiving chunks', data.index);
       this.setState({ isLoadingData: true });
+      const { receivedChunks } = this.state;
+      receivedChunks.push(data);
+      this.setState({ receivedChunks });
+    });
+
+    socket.on('file-ended', async data => {
+      this.setState({ isLoadingData: true });
+
+      // Order the chunks
+      const orderedChunks = this.state.receivedChunks.sort(
+        (a, b) => a.index - b.index,
+      );
 
       debug('Receiving file');
 
@@ -97,7 +134,13 @@ class ImportSessions extends Component<IProps, IState> {
 
       // Handle received data here
       try {
-        handleReceiveFile(data, privateKey);
+        handleReceiveFile(
+          {
+            encryptedChunks: orderedChunks.map(chunk => chunk.chunk),
+            encryptedKey: data.encryptedKey,
+          },
+          privateKey,
+        );
       } catch (error) {
         debug('Decryption failed:', error);
         this.setState({ isLoadingData: false });

@@ -221,8 +221,15 @@ class AccountDashboard extends Component<IProp, IState> {
       try {
         const encryptedData = handleReadyToSend(dataToSend, publicKey);
 
+        for (const [index, chunk] of encryptedData.encryptedChunks.entries()) {
+          // Emit the encrypted chunks
+          socket.emit('send-file', socketCode, { chunk, index });
+        }
+
         // Emit the encrypted chunks
-        socket.emit('send-file', socketCode, encryptedData);
+        socket.emit('send-file-ended', socketCode, {
+          encryptedKey: encryptedData.encryptedKey,
+        });
       } catch (error) {
         debug('Encryption failed:', error);
       }
