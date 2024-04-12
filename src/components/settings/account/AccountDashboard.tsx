@@ -24,6 +24,14 @@ import type User from '../../../models/User';
 import { userDataPath } from '../../../environment-remote';
 import Loader from '../../ui/loader';
 
+// Function to encrypt data using AES
+function encryptData(data: string, key: crypto.CipherKey) {
+  const cipher = crypto.createCipheriv('aes-256-cbc', key, Buffer.alloc(16)); // AES-256 with CBC mode
+  let encryptedData = cipher.update(data, 'utf8', 'hex');
+  encryptedData += cipher.final('hex');
+  return encryptedData;
+}
+
 const debug = require('../../../preload-safe-debug')(
   'Ferdium:App:AccountDashboard',
 );
@@ -218,15 +226,86 @@ class AccountDashboard extends Component<IProp, IState> {
         return;
       }
 
-      // Encrypt dataToSend with publicKey
-      const encryptedData = crypto
-        .publicEncrypt(publicKey, Buffer.from(JSON.stringify(dataToSend)))
-        .toString('base64');
+      // Without encryption
+      // socket.emit('send-file', socketCode, dataToSend);
 
-      socket.emit('send-file', socketCode, {
-        ...dataToSend,
-        buffer: encryptedData,
-      });
+      // try {
+      //   // Convert buffer to base64 string
+      //   const base64Buffer = dataToSend.buffer.toString('base64');
+
+      //   // Create an object to send with base64 buffer
+      //   const objToSend = {
+      //     ...dataToSend,
+      //     buffer: base64Buffer,
+      //   };
+
+      //   debug('Original data:', JSON.stringify(objToSend));
+
+      //   // Convert the object to a JSON string
+      //   const jsonData = JSON.stringify(objToSend);
+
+      //   const chunkSize = 245; // Adjust the chunk size based on key size and padding
+      //   const chunks: Buffer[] = [];
+      //   let offset = 0;
+
+      //   while (offset < Buffer.byteLength(jsonData)) {
+      //     // Extract a chunk of data
+      //     const chunk = jsonData.slice(offset, offset + chunkSize);
+      //     debug('Percentage:', (offset / Buffer.byteLength(jsonData)) * 100);
+      //     // Encrypt the chunk
+      //     const encryptedChunk = crypto.publicEncrypt(
+      //       publicKey,
+      //       Buffer.from(chunk),
+      //     );
+      //     // Add the encrypted chunk to the array
+      //     chunks.push(encryptedChunk);
+      //     offset += chunkSize;
+      //   }
+
+      //   // Emit the chunks
+      //   socket.emit('send-file', socketCode, chunks);
+      // } catch (error) {
+      //   debug('Encryption failed:', error);
+      // }
+
+      try {
+        // Convert buffer to base64 string
+        const base64Buffer = dataToSend.buffer.toString('base64');
+
+        // Create an object to send with base64 buffer
+        const objToSend = {
+          ...dataToSend,
+          buffer: base64Buffer,
+        };
+
+        debug('Original data:', JSON.stringify(objToSend));
+
+        const chunkSize = 1024; // Adjust based on your requirements
+
+        // Convert the object to a JSON string
+        const jsonData = JSON.stringify(objToSend);
+
+        // Split the JSON string into chunks
+        const chunks: string[] = [];
+        for (let i = 0; i < jsonData.length; i += chunkSize) {
+          chunks.push(jsonData.slice(i, i + chunkSize));
+        }
+
+        // Encrypt each chunk
+        const aesKey = crypto.randomBytes(32); // AES-256 key
+        const encryptedChunks = chunks.map(chunk => encryptData(chunk, aesKey));
+
+        // Encrypt the AES key with the public key
+        const encryptedKey = crypto.publicEncrypt(publicKey, aesKey);
+
+        // Emit the encrypted chunks
+        socket.emit('send-file', socketCode, {
+          encryptedChunks,
+          encryptedKey,
+        });
+      } catch (error) {
+        debug('Encryption failed:', error);
+      }
     });
   }
 
