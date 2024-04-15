@@ -223,7 +223,11 @@ class AccountDashboard extends Component<IProp, IState> {
 
         for (const [index, chunk] of encryptedData.encryptedChunks.entries()) {
           // Emit the encrypted chunks
-          socket.emit('send-file', socketCode, { chunk, index });
+          socket.emit('send-file', socketCode, {
+            chunk,
+            index,
+            total: encryptedData.encryptedChunks.length,
+          });
         }
 
         // Emit the encrypted chunks
