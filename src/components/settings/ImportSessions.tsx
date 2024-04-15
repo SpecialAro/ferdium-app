@@ -48,6 +48,7 @@ interface IState {
     publicKey: string;
     privateKey: string;
   };
+  progress: number | null;
   receivedChunks: any[];
 }
 
@@ -71,6 +72,7 @@ class ImportSessions extends Component<IProps, IState> {
         publicKey: '',
         privateKey: '',
       },
+      progress: null,
       receivedChunks: [],
     };
   }
@@ -98,6 +100,12 @@ class ImportSessions extends Component<IProps, IState> {
       // some additional context, for example the XMLHttpRequest object
       debug(details.context);
       this.setState({ isSocketConnected: false });
+    });
+
+    socket.on('file-progress', data => {
+      // Handle file progress here
+      debug('File progress:', data);
+      this.setState({ progress: data });
     });
 
     socket.on('connect_error', (err: any) => {
@@ -233,6 +241,9 @@ class ImportSessions extends Component<IProps, IState> {
                   disabled={!this.state.socketCode || isLoadingData}
                   onClick={receiveSessionData}
                 />
+                {this.state.progress !== null && (
+                  <div>{`Progress: ${this.state.progress}%`}</div>
+                )}
               </div>
             </div>
           )}
